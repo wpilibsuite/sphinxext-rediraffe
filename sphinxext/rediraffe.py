@@ -134,26 +134,20 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     # write redirects
     for redirect_from, redirect_to in redirects.items():
 
-        # relative paths from source dir (with source ext)
-        redirect_from = Path(redirect_from)
-        redirect_to = Path(redirect_to)
+        # relative paths from source dir (without ext)
+        redirect_from = Path(redirect_from).with_suffix("")
+        redirect_to = Path(redirect_to).with_suffix("")
 
         if type(app.builder) == DirectoryHTMLBuilder:
-            if redirect_from.with_suffix("") != Path(app.config.master_doc).with_suffix(
-                ""
-            ):
-                redirect_from = redirect_from.with_suffix("") / "index"
-            if redirect_to.with_suffix("") != Path(app.config.master_doc).with_suffix(
-                ""
-            ):
-                redirect_to = redirect_to.with_suffix("") / "index"
-
-        redirect_from = redirect_from.with_suffix(".html")
-        redirect_to = redirect_to.with_suffix(".html")
+            master_doc = Path(app.config.master_doc).with_suffix("")
+            if redirect_from != master_doc:
+                redirect_from = redirect_from / "index"
+            if redirect_to != master_doc:
+                redirect_to = redirect_to / "index"
 
         # absolute paths into the build dir
-        build_redirect_from = Path(app.outdir) / redirect_from
-        build_redirect_to = Path(app.outdir) / redirect_to
+        build_redirect_from = Path(app.outdir) / redirect_from.with_suffix(".html")
+        build_redirect_to = Path(app.outdir) / redirect_to.with_suffix(".html")
 
         if build_redirect_from.exists():
             logger.warning(
