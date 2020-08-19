@@ -7,7 +7,7 @@ from sphinx.errors import ExtensionError
 from pathlib import Path
 import logging
 
-# from .conftest import rel2url
+from conftest import rel2url
 
 
 @pytest.fixture(scope="module")
@@ -154,6 +154,22 @@ class TestExtHtml:
 
         ensure_redirect("F5/F4/F3/F2/F1/1.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="jinja")
+    def test_jinja(self, app: Sphinx, _sb: BaseCase):
+        app.build()
+        assert app.statuscode == 0
+
+        _sb.open(rel2url(app.outdir, "another.html"))
+        text = _sb.get_text(selector="html")
+        text = text.replace("\\", "/")
+        text = text.replace("//", "/")
+
+        assert "rel_url: index.html" in text
+        assert "from_file: another.rst" in text
+        assert "to_file: index.rst" in text
+        assert "from_url: another.html" in text
+        assert "to_url: index.html" in text
+
 
 class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_redirects")
@@ -293,3 +309,19 @@ class TestExtDirHtml:
         ensure_redirect("F2/1/index.html", "z/index.html")
 
         ensure_redirect("F5/F4/F3/F2/F1/1/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="jinja")
+    def test_jinja(self, app: Sphinx, _sb: BaseCase):
+        app.build()
+        assert app.statuscode == 0
+
+        _sb.open(rel2url(app.outdir, "another/index.html"))
+        text = _sb.get_text(selector="html")
+        text = text.replace("\\", "/")
+        text = text.replace("//", "/")
+
+        assert "rel_url: ../index.html" in text
+        assert "from_file: another.rst" in text
+        assert "to_file: index.rst" in text
+        assert "from_url: another/index.html" in text
+        assert "to_url: index.html" in text

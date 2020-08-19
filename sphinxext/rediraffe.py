@@ -14,8 +14,24 @@ from sphinx.errors import ExtensionError
 from sphinx.util import logging
 from sphinx.util.console import yellow, green, red  # pylint: disable=no-name-in-module
 
+from jinja2 import Environment, FileSystemLoader, Template
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_REDIRAFFE_TEMPLATE = Template(
+    """
+<html>
+    <head>
+        <meta http-equiv="refresh" content="0; url={{rel_url}}"/>
+    </head>
+    <body>
+        <p>You should have been redirected.</p>
+        <a href="{{rel_url}}">If not, click here to continue.</a>
+    </body>
+</html>
+
+"""
+)
 
 
 def create_graph(path: Path) -> Dict[str, str]:
@@ -94,6 +110,22 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         )
         return
 
+    rediraffe_template = app.config.rediraffe_template
+    if isinstance(rediraffe_template, str):
+        # path
+        template_path = Path(app.srcdir) / rediraffe_template
+        if template_path.exists:
+            file_loader = FileSystemLoader(template_path.parent)
+            env = Environment(loader=file_loader)
+            rediraffe_template = env.get_template(template_path.name)
+        else:
+            logger.warning(
+                "rediraffe: rediraffe_template does not exist. The default will be used."
+            )
+            rediraffe_template = DEFAULT_REDIRAFFE_TEMPLATE
+    else:
+        rediraffe_template = DEFAULT_REDIRAFFE_TEMPLATE
+
     graph_edges = {}
 
     rediraffe_redirects = app.config.rediraffe_redirects
@@ -132,11 +164,11 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     logger.info("Writing redirects...")
 
     # write redirects
-    for redirect_from, redirect_to in redirects.items():
+    for src_redirect_from, src_redirect_to in redirects.items():
 
         # relative paths from source dir (without ext)
-        redirect_from = Path(redirect_from).with_suffix("")
-        redirect_to = Path(redirect_to).with_suffix("")
+        redirect_from = Path(src_redirect_from).with_suffix("")
+        redirect_to = Path(src_redirect_to).with_suffix("")
 
         if type(app.builder) == DirectoryHTMLBuilder:
             master_doc = Path(app.config.master_doc).with_suffix("")
@@ -145,9 +177,12 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
             if redirect_to != master_doc:
                 redirect_to = redirect_to / "index"
 
+        redirect_from = redirect_from.with_suffix(".html")
+        redirect_to = redirect_to.with_suffix(".html")
+
         # absolute paths into the build dir
-        build_redirect_from = Path(app.outdir) / redirect_from.with_suffix(".html")
-        build_redirect_to = Path(app.outdir) / redirect_to.with_suffix(".html")
+        build_redirect_from = Path(app.outdir) / redirect_from
+        build_redirect_to = Path(app.outdir) / redirect_to
 
         if build_redirect_from.exists():
             logger.warning(
@@ -164,7 +199,13 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         build_redirect_from.parent.mkdir(parents=True, exist_ok=True)
         with build_redirect_from.open("w") as f:
             f.write(
-                f'<html><head><meta http-equiv="refresh" content="0; url={relpath(build_redirect_to, build_redirect_from.parent)}"/></head></html>'
+                rediraffe_template.render(
+                    rel_url=relpath(build_redirect_to, build_redirect_from.parent),
+                    from_file=src_redirect_from,
+                    to_file=src_redirect_to,
+                    from_url=redirect_from,
+                    to_url=redirect_to,
+                )
             )
             logger.info(
                 f'{green("(good)")} {redirect_from} {green("-->")} {redirect_to}'
@@ -259,6 +300,7 @@ class CheckRedirectsDiffBuilder(Builder):
 def setup(app: Sphinx) -> Dict[str, Any]:
     app.add_config_value("rediraffe_redirects", "", None)
     app.add_config_value("rediraffe_branch", "", None)
+    app.add_config_value("rediraffe_template", None, None)
 
     app.add_builder(CheckRedirectsDiffBuilder)
     app.connect("build-finished", build_redirects)
