@@ -6,26 +6,27 @@ from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
 from pathlib import Path
 import logging
+
 # from .conftest import rel2url
+
 
 @pytest.fixture(scope="module")
 def rootdir():
     return path(__file__).parent.abspath() / "roots/ext"
 
 
-class TestExtHtml():
-
+class TestExtHtml:
     @pytest.mark.sphinx("html", testroot="no_redirects")
     def test_no_redirects(self, app: Sphinx):
         app.build()
         assert app.statuscode == 0
-        
+
     @pytest.mark.sphinx("html", testroot="simple")
     def test_simple(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
         ensure_redirect("another.html", "index.html")
-        
+
     @pytest.mark.sphinx("html", testroot="no_cycle")
     def test_no_cycle(self, app: Sphinx, ensure_redirect):
         app.build()
@@ -82,7 +83,6 @@ class TestExtHtml():
 
         ensure_redirect("deletedfolder/another.html", "index.html")
         ensure_redirect("deletedfolder/deletedfolder2/another.html", "index.html")
-        
 
     @pytest.mark.sphinx("html", testroot="complex")
     def test_complex(self, app: Sphinx, ensure_redirect):
@@ -155,19 +155,18 @@ class TestExtHtml():
         ensure_redirect("F5/F4/F3/F2/F1/1.html", "index.html")
 
 
-class TestExtDirHtml():
-
+class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_redirects")
     def test_no_redirects(self, app: Sphinx):
         app.build()
         assert app.statuscode == 0
-        
+
     @pytest.mark.sphinx("dirhtml", testroot="simple")
     def test_simple(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
         ensure_redirect("another/index.html", "index.html")
-        
+
     @pytest.mark.sphinx("dirhtml", testroot="no_cycle")
     def test_no_cycle(self, app: Sphinx, ensure_redirect):
         app.build()
@@ -224,7 +223,6 @@ class TestExtDirHtml():
 
         ensure_redirect("deletedfolder/another/index.html", "index.html")
         ensure_redirect("deletedfolder/deletedfolder2/another/index.html", "index.html")
-        
 
     @pytest.mark.sphinx("dirhtml", testroot="complex")
     def test_complex(self, app: Sphinx, ensure_redirect):
@@ -260,8 +258,6 @@ class TestExtDirHtml():
         ensure_redirect("F2/1/index.html", "z/index.html")
 
         ensure_redirect("F5/F4/F3/F2/F1/1/index.html", "index.html")
-
-
 
     @pytest.mark.sphinx("dirhtml", testroot="complex_dict")
     def test_complex_dict(self, app: Sphinx, ensure_redirect):

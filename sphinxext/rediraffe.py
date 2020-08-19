@@ -12,7 +12,7 @@ from sphinx.builders.linkcheck import CheckExternalLinksBuilder
 from sphinx.errors import ExtensionError
 
 from sphinx.util import logging
-from sphinx.util.console import yellow, green, red # pylint: disable=no-name-in-module
+from sphinx.util.console import yellow, green, red  # pylint: disable=no-name-in-module
 
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,22 @@ def create_graph(path: Path) -> Dict[str, str]:
             edge_from, edge_to, *_ = re.split(r"\s+", line)
             if edge_from in graph_edges:
                 # Duplicate vertices not allowed / Vertices can only have 1 outgoing edge
-                logger.error(red(f"rediraffe: {edge_from} is redirected multiple times in the rediraffe_redirects file!"))
+                logger.error(
+                    red(
+                        f"rediraffe: {edge_from} is redirected multiple times in the rediraffe_redirects file!"
+                    )
+                )
                 broken = True
             graph_edges[edge_from] = edge_to
     if broken:
-        logger.error(f"rediraffe: Some links are redirected multiple times. They should only be redirected once.")
-        raise ExtensionError(f"rediraffe: Some links are redirected multiple times. They should only be redirected once.")
+        logger.error(
+            f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
+        )
+        raise ExtensionError(
+            f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
+        )
     return graph_edges
+
 
 def create_simple_redirects(graph_edges: dict) -> dict:
     redirects = {}
@@ -48,7 +57,12 @@ def create_simple_redirects(graph_edges: dict) -> dict:
         while vertex in graph_edges:
             if vertex in visited:
                 # Ensure graph is a DAG
-                logger.error(red("rediraffe: A circular redirect exists. Links involved: " + " -> ".join(visited + [vertex])))
+                logger.error(
+                    red(
+                        "rediraffe: A circular redirect exists. Links involved: "
+                        + " -> ".join(visited + [vertex])
+                    )
+                )
                 broken_vertices.update(visited)
                 break
             visited.append(vertex)
@@ -59,10 +73,17 @@ def create_simple_redirects(graph_edges: dict) -> dict:
             redirects[visited_vertex] = vertex
 
     if broken_vertices:
-        logger.error(f"rediraffe: At least 1 circular redirect detected. All involved links: " + ", ".join(broken_vertices))
-        raise ExtensionError(f"rediraffe: At least 1 circular redirect detected. All involved links: " + ", ".join(broken_vertices))
+        logger.error(
+            f"rediraffe: At least 1 circular redirect detected. All involved links: "
+            + ", ".join(broken_vertices)
+        )
+        raise ExtensionError(
+            f"rediraffe: At least 1 circular redirect detected. All involved links: "
+            + ", ".join(broken_vertices)
+        )
 
     return redirects
+
 
 def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     if exception != None:
@@ -71,9 +92,11 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     if isinstance(app.builder, CheckExternalLinksBuilder):
         logger.info("rediraffe: Redirect generation skipped for linkcheck builders.")
         return
-    
+
     if type(app.builder) not in (StandaloneHTMLBuilder, DirectoryHTMLBuilder):
-        logger.info("rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml")
+        logger.info(
+            "rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml"
+        )
         return
 
     graph_edges = {}
@@ -86,7 +109,11 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         # filename
         path = Path(app.srcdir) / rediraffe_redirects
         if not path.is_file():
-            logger.error(red("rediraffe: rediraffe_redirects file does not exist. Redirects will not be generated."))
+            logger.error(
+                red(
+                    "rediraffe: rediraffe_redirects file does not exist. Redirects will not be generated."
+                )
+            )
             # raise ExtensionError("rediraffe: rediraffe_redirects file does not exist.")
             app.statuscode = 1
             return
@@ -96,10 +123,12 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
             app.statuscode = 1
             raise e
     else:
-        logger.warning("rediraffe: rediraffe was not given redirects to process. Redirects will not be generated.")
+        logger.warning(
+            "rediraffe: rediraffe was not given redirects to process. Redirects will not be generated."
+        )
         app.statuscode = 1
         return
-    
+
     try:
         redirects = create_simple_redirects(graph_edges)
     except ExtensionError as e:
@@ -110,17 +139,21 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
 
     # write redirects
     for redirect_from, redirect_to in redirects.items():
-        
+
         # relative paths from source dir (with source ext)
         redirect_from = Path(redirect_from)
         redirect_to = Path(redirect_to)
-        
+
         if type(app.builder) == DirectoryHTMLBuilder:
-            if redirect_from.with_suffix("") != Path(app.config.master_doc).with_suffix(""):
+            if redirect_from.with_suffix("") != Path(app.config.master_doc).with_suffix(
+                ""
+            ):
                 redirect_from = redirect_from.with_suffix("") / "index"
-            if redirect_to.with_suffix("") != Path(app.config.master_doc).with_suffix(""):
+            if redirect_to.with_suffix("") != Path(app.config.master_doc).with_suffix(
+                ""
+            ):
                 redirect_to = redirect_to.with_suffix("") / "index"
-        
+
         redirect_from = redirect_from.with_suffix(".html")
         redirect_to = redirect_to.with_suffix(".html")
 
@@ -129,17 +162,25 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         build_redirect_to = Path(app.outdir) / redirect_to
 
         if build_redirect_from.exists():
-            logger.warning(f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_from} already exists!')
+            logger.warning(
+                f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_from} already exists!'
+            )
             app.statuscode = 1
 
         if not build_redirect_to.exists():
-            logger.warning(f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_to} does not exist!')
+            logger.warning(
+                f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_to} does not exist!'
+            )
             app.statuscode = 1
 
         build_redirect_from.parent.mkdir(parents=True, exist_ok=True)
         with build_redirect_from.open("w") as f:
-            f.write(f'<html><head><meta http-equiv="refresh" content="0; url={relpath(build_redirect_to, build_redirect_from.parent)}"/></head></html>')
-            logger.info(green("(good) ") + f"{redirect_from} {green('-->')} {redirect_to}")
+            f.write(
+                f'<html><head><meta http-equiv="refresh" content="0; url={relpath(build_redirect_to, build_redirect_from.parent)}"/></head></html>'
+            )
+            logger.info(
+                green("(good) ") + f"{redirect_from} {green('-->')} {redirect_to}"
+            )
 
 
 class CheckRedirectsDiffBuilder(Builder):
@@ -166,15 +207,17 @@ class CheckRedirectsDiffBuilder(Builder):
                 self.app.statuscode = 1
                 return
         else:
-            logger.error("rediraffe: rediraffe was not given redirects to process. Redirects will not be generated.")
+            logger.error(
+                "rediraffe: rediraffe was not given redirects to process. Redirects will not be generated."
+            )
             self.app.statuscode = 1
             # raise ExtensionError()
-        
+
         absolute_redirects = {
-            (src_path / redirect_from).resolve() : (src_path / redirect_to).resolve()
+            (src_path / redirect_from).resolve(): (src_path / redirect_to).resolve()
             for redirect_from, redirect_to in rediraffe_redirects.items()
         }
-        
+
         path_to_git_repo = subprocess.check_output(
             f"git -C {self.app.srcdir} rev-parse --show-toplevel", shell=True
         ).decode("utf-8")
@@ -188,39 +231,44 @@ class CheckRedirectsDiffBuilder(Builder):
         # splitlines
         deleted_files = deleted_files.splitlines()
         # convert to utf-8
-        deleted_files = [
-            filename.decode("utf-8") for filename in deleted_files
-        ]
+        deleted_files = [filename.decode("utf-8") for filename in deleted_files]
         # convert to path
         deleted_files = [Path(filename.strip()) for filename in deleted_files]
         # to absolute path
         deleted_files = [
-            Path(path_to_git_repo.strip()) / filename
-            for filename in deleted_files
+            Path(path_to_git_repo.strip()) / filename for filename in deleted_files
         ]
         # in source dir
         deleted_files = [
-            filename for filename in deleted_files
+            filename
+            for filename in deleted_files
             if str(filename).startswith(str(src_path))
         ]
         # with source suffix
         deleted_files = [
-            filename for filename in deleted_files
-            if filename.suffix in source_suffixes
+            filename for filename in deleted_files if filename.suffix in source_suffixes
         ]
 
         for deleted_file in deleted_files:
             if deleted_file in absolute_redirects.keys():
-                logger.info(f"deleted file {deleted_file} redirects to {absolute_redirects[deleted_file]}.")
+                logger.info(
+                    f"deleted file {deleted_file} redirects to {absolute_redirects[deleted_file]}."
+                )
             else:
-                logger.error(red("(broken) ") + f"{deleted_file} was deleted but is not redirected!")
+                logger.error(
+                    red("(broken) ")
+                    + f"{deleted_file} was deleted but is not redirected!"
+                )
                 self.app.statuscode = 1
 
+    def get_outdated_docs(self):
+        return []
 
-    def get_outdated_docs(self): return []
-    def prepare_writing(self, docnames): pass
-    def write_doc(self, docname, doctree): pass
+    def prepare_writing(self, docnames):
+        pass
 
+    def write_doc(self, docname, doctree):
+        pass
 
 
 def setup(app: Sphinx) -> Dict[str, Any]:

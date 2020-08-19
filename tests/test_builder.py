@@ -1,6 +1,7 @@
 import pytest
 from sphinx.testing.path import path
 
+
 @pytest.fixture(scope="module")
 def rootdir():
     return path(__file__).parent.abspath() / "roots/builder"

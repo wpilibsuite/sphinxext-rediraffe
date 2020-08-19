@@ -39,9 +39,11 @@ def content(app):
     app.build()
     yield app
 
+
 @pytest.fixture()
 def outdir(app):
     return app.outdir
+
 
 @pytest.fixture()
 def app_init_repo(make_app, app_params):
@@ -145,7 +147,6 @@ def _sb(request):
     from seleniumbase import BaseCase
 
     class BaseClass(BaseCase):
-
         def setUp(self):
             super(BaseClass, self).setUp()
 
@@ -165,6 +166,7 @@ def _sb(request):
         sb.tearDown()
         sb._needs_tearDown = False
 
+
 @pytest.fixture()
 def ensure_redirect(outdir, _sb):
     # outdir = app.outdir
@@ -174,4 +176,5 @@ def ensure_redirect(outdir, _sb):
         expected_after_path = Path(rel2url(outdir, expected_after))
         actual_after_path = Path(_sb.get_current_url())
         assert actual_after_path == expected_after_path
+
     return _ensure_redirect
