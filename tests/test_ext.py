@@ -166,14 +166,14 @@ class TestExtDirHtml():
     def test_simple(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
-        ensure_redirect("another.html", "index.html")
+        ensure_redirect("another/index.html", "index.html")
         
     @pytest.mark.sphinx("dirhtml", testroot="no_cycle")
     def test_no_cycle(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
-        ensure_redirect("a.html", "index.html")
-        ensure_redirect("b.html", "index.html")
+        ensure_redirect("a/index.html", "index.html")
+        ensure_redirect("b/index.html", "index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="cycle")
     def test_cycle(self, app: Sphinx):
@@ -185,11 +185,11 @@ class TestExtDirHtml():
     def test_nested(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
-        ensure_redirect("tof1.html", "docs/folder1/f1.html")
-        ensure_redirect("docs/folder1/tof1.html", "docs/folder1/f1.html")
-        ensure_redirect("docs/folder1/tof2.html", "docs/folder2/f2.html")
-        ensure_redirect("docs/folder2/toindex.html", "index.html")
-        ensure_redirect("totoindex.html", "index.html")
+        ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
+        ensure_redirect("docs/folder2/toindex/index.html", "index.html")
+        ensure_redirect("totoindex/index.html", "index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="link_redirected_twice")
     def test_link_redirected_twice(self, app: Sphinx):
@@ -222,8 +222,8 @@ class TestExtDirHtml():
         app.build()
         assert app.statuscode == 0
 
-        ensure_redirect("deletedfolder/another.html", "index.html")
-        ensure_redirect("deletedfolder/deletedfolder2/another.html", "index.html")
+        ensure_redirect("deletedfolder/another/index.html", "index.html")
+        ensure_redirect("deletedfolder/deletedfolder2/another/index.html", "index.html")
         
 
     @pytest.mark.sphinx("dirhtml", testroot="complex")
@@ -231,35 +231,35 @@ class TestExtDirHtml():
         app.build()
         assert app.statuscode == 0
 
-        ensure_redirect("a.html", "e.html")
-        ensure_redirect("b.html", "e.html")
-        ensure_redirect("c.html", "e.html")
-        ensure_redirect("d.html", "e.html")
-        ensure_redirect("f.html", "e.html")
-        ensure_redirect("g.html", "e.html")
-        ensure_redirect("h.html", "e.html")
+        ensure_redirect("a/index.html", "e/index.html")
+        ensure_redirect("b/index.html", "e/index.html")
+        ensure_redirect("c/index.html", "e/index.html")
+        ensure_redirect("d/index.html", "e/index.html")
+        ensure_redirect("f/index.html", "e/index.html")
+        ensure_redirect("g/index.html", "e/index.html")
+        ensure_redirect("h/index.html", "e/index.html")
 
-        ensure_redirect("i.html", "j.html")
+        ensure_redirect("i/index.html", "j/index.html")
 
-        ensure_redirect("k.html", "l.html")
+        ensure_redirect("k/index.html", "l/index.html")
 
-        ensure_redirect("m.html", "o.html")
-        ensure_redirect("n.html", "o.html")
+        ensure_redirect("m/index.html", "o/index.html")
+        ensure_redirect("n/index.html", "o/index.html")
 
-        ensure_redirect("q.html", "z.html")
-        ensure_redirect("r.html", "z.html")
-        ensure_redirect("s.html", "z.html")
-        ensure_redirect("t.html", "z.html")
-        ensure_redirect("u.html", "z.html")
-        ensure_redirect("v.html", "z.html")
-        ensure_redirect("w.html", "z.html")
-        ensure_redirect("x.html", "z.html")
-        ensure_redirect("y.html", "z.html")
-        ensure_redirect("F1/1.html", "z.html")
-        ensure_redirect("F1/2.html", "z.html")
-        ensure_redirect("F2/1.html", "z.html")
+        ensure_redirect("q/index.html", "z/index.html")
+        ensure_redirect("r/index.html", "z/index.html")
+        ensure_redirect("s/index.html", "z/index.html")
+        ensure_redirect("t/index.html", "z/index.html")
+        ensure_redirect("u/index.html", "z/index.html")
+        ensure_redirect("v/index.html", "z/index.html")
+        ensure_redirect("w/index.html", "z/index.html")
+        ensure_redirect("x/index.html", "z/index.html")
+        ensure_redirect("y/index.html", "z/index.html")
+        ensure_redirect("F1/1/index.html", "z/index.html")
+        ensure_redirect("F1/2/index.html", "z/index.html")
+        ensure_redirect("F2/1/index.html", "z/index.html")
 
-        ensure_redirect("F5/F4/F3/F2/F1/1.html", "index.html")
+        ensure_redirect("F5/F4/F3/F2/F1/1/index.html", "index.html")
 
 
 
@@ -297,6 +297,3 @@ class TestExtDirHtml():
         ensure_redirect("F2/1/index.html", "z/index.html")
 
         ensure_redirect("F5/F4/F3/F2/F1/1/index.html", "index.html")
-
-
-#TODO: don't nest master doc or else breaks dirhtml

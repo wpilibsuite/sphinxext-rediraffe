@@ -116,8 +116,10 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         redirect_to = Path(redirect_to)
         
         if type(app.builder) == DirectoryHTMLBuilder:
-            redirect_from = redirect_from.with_suffix("") / "index"
-            redirect_to = redirect_to.with_suffix("") / "index"
+            if redirect_from.with_suffix("") != Path(app.config.master_doc).with_suffix(""):
+                redirect_from = redirect_from.with_suffix("") / "index"
+            if redirect_to.with_suffix("") != Path(app.config.master_doc).with_suffix(""):
+                redirect_to = redirect_to.with_suffix("") / "index"
         
         redirect_from = redirect_from.with_suffix(".html")
         redirect_to = redirect_to.with_suffix(".html")
