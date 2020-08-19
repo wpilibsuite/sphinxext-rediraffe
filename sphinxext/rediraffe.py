@@ -37,12 +37,9 @@ def create_graph(path: Path) -> Dict[str, str]:
                 broken = True
             graph_edges[edge_from] = edge_to
     if broken:
-        logger.error(
-            f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
-        )
-        raise ExtensionError(
-            f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
-        )
+        err_msg = f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
+        logger.error(err_msg)
+        raise ExtensionError(err_msg)
     return graph_edges
 
 
@@ -73,14 +70,12 @@ def create_simple_redirects(graph_edges: dict) -> dict:
             redirects[visited_vertex] = vertex
 
     if broken_vertices:
-        logger.error(
+        err_msg = (
             f"rediraffe: At least 1 circular redirect detected. All involved links: "
             + ", ".join(broken_vertices)
         )
-        raise ExtensionError(
-            f"rediraffe: At least 1 circular redirect detected. All involved links: "
-            + ", ".join(broken_vertices)
-        )
+        logger.error(err_msg)
+        raise ExtensionError(err_msg)
 
     return redirects
 
@@ -114,9 +109,9 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
                     "rediraffe: rediraffe_redirects file does not exist. Redirects will not be generated."
                 )
             )
-            # raise ExtensionError("rediraffe: rediraffe_redirects file does not exist.")
             app.statuscode = 1
             return
+
         try:
             graph_edges = create_graph(path)
         except ExtensionError as e:
@@ -126,7 +121,6 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         logger.warning(
             "rediraffe: rediraffe was not given redirects to process. Redirects will not be generated."
         )
-        app.statuscode = 1
         return
 
     try:
@@ -179,7 +173,7 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
                 f'<html><head><meta http-equiv="refresh" content="0; url={relpath(build_redirect_to, build_redirect_from.parent)}"/></head></html>'
             )
             logger.info(
-                green("(good) ") + f"{redirect_from} {green('-->')} {redirect_to}"
+                f'{green("(good)")} {redirect_from} {green("-->")} {redirect_to}'
             )
 
 
@@ -207,11 +201,9 @@ class CheckRedirectsDiffBuilder(Builder):
                 self.app.statuscode = 1
                 return
         else:
-            logger.error(
-                "rediraffe: rediraffe was not given redirects to process. Redirects will not be generated."
-            )
+            logger.error("rediraffe: rediraffe was not given redirects to process.")
             self.app.statuscode = 1
-            # raise ExtensionError()
+            return
 
         absolute_redirects = {
             (src_path / redirect_from).resolve(): (src_path / redirect_to).resolve()
@@ -250,14 +242,13 @@ class CheckRedirectsDiffBuilder(Builder):
         ]
 
         for deleted_file in deleted_files:
-            if deleted_file in absolute_redirects.keys():
+            if deleted_file in absolute_redirects:
                 logger.info(
                     f"deleted file {deleted_file} redirects to {absolute_redirects[deleted_file]}."
                 )
             else:
                 logger.error(
-                    red("(broken) ")
-                    + f"{deleted_file} was deleted but is not redirected!"
+                    f'{red("(broken)")} {deleted_file} was deleted but is not redirected!'
                 )
                 self.app.statuscode = 1
 
