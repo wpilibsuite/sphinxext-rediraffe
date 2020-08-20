@@ -35,6 +35,9 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 
 
 def create_graph(path: Path) -> Dict[str, str]:
+    """
+    Convert a file containing a whitespace delimited edge list (key value pairs) to a dict. Throws error on duplicate keys.
+    """
     graph_edges = {}
     broken = False
     with open(path, "r") as file:
@@ -60,6 +63,9 @@ def create_graph(path: Path) -> Dict[str, str]:
 
 
 def create_simple_redirects(graph_edges: dict) -> dict:
+    """
+    Ensures that a graph is a acyclic and reconnects every vertex to its leaf vertex.
+    """
     redirects = {}
     broken_vertices = set()
     for vertex in graph_edges:
@@ -97,6 +103,10 @@ def create_simple_redirects(graph_edges: dict) -> dict:
 
 
 def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
+    """
+    Build amd write redirects
+    """
+    
     if exception != None:
         return
 
