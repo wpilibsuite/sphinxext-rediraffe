@@ -3,9 +3,12 @@
 
 Sphinx Extension to redirect files
 
+![Rediraffe](assets/rediraffe_logo.svg)
+
 ## Installation
 
-`python -m pip install https://github.com/TheTripleV/sphinxext-rediraffe`
+`python -m pip install git+https://github.com/wpilibsuite/sphinxext-rediraffe.git`
+
 
 ## Usage
 Add `sphinxext.rediraffe` to your extensions list in your `conf.py`
@@ -15,17 +18,23 @@ extensions = [
    sphinxext.rediraffe,
 ]
 ```
-<!-- ## Options
+## Options
 These values are placed in the conf.py of your sphinx project.
 
-* `linkcheckdiff_branch`
-    * Required. The branch to diff against.
+* `rediraffe_branch`
+    * Required for rediraffecheckdiff builder. The branch to diff against.
 
-Note: linkcheckdiff is an extension of the linkcheck builder that ships with Sphinx. linkcheckdiff respects all of linkcheck's configuration options.
+* `rediraffe_redirects`
+    * Required. The filename or dict containing redirects
+
+* `rediraffe_template`
+    * Optional. The jinja template to use to render the inserted redirecting files.
 
 
 ## Example Config
 
 ```python
-linkcheckdiff_branch = "master"
-``` -->
+rediraffe_branch = "master"
+```
+
+tests/roots/ext/
