@@ -5,6 +5,11 @@ Sphinx Extension to redirect files
 
 ![Rediraffe](assets/rediraffe_logo.svg)
 
+This sphinx extension redirects non-existent pages to working pages.
+Additionally, a builder is provided to check that deleted/renamed files in your git repo are redirected. 
+
+Note: Chained redirects will be resolved. For example, if a config has 6 chained redirects, all 6 links will redirect directly to the final link. The enduser will never experience more than 1 redirection.
+
 ## Installation
 
 `python -m pip install git+https://github.com/wpilibsuite/sphinxext-rediraffe.git`
@@ -18,6 +23,11 @@ extensions = [
    sphinxext.rediraffe,
 ]
 ```
+
+To check that deleted/renamed files in your git repo are in your redirects,
+1. Make sure `rediraffe_branch` and `rediraffe_redirects` are set in conf.py.
+2. Run the `rediraffecheckdiff` builder.
+
 ## Options
 These values are placed in the conf.py of your sphinx project.
 
@@ -25,16 +35,65 @@ These values are placed in the conf.py of your sphinx project.
     * Required for rediraffecheckdiff builder. The branch to diff against.
 
 * `rediraffe_redirects`
-    * Required. The filename or dict containing redirects
+    * Required. A filename or dict containing redirects
 
 * `rediraffe_template`
-    * Optional. The jinja template to use to render the inserted redirecting files.
+    * Optional. A jinja template to use to render the inserted redirecting files. If not specified, a default template will be used. This template will only be accessed after the html/htmldir builder is finished; Therefore, this file may be generated as part of your build.
+    * variables available to rediraffe_template:
+        * `from_file` - the file being redirected as written in rediraffe_redirects.
+        * `to_file` - the destination file that from_file is redirected to as written in rediraffe_redirects.
+        * `from_url` - the path to from_url's html file (built by rediraffe) relative to the outdir.
+        * `to_url` - the path to to_url's built html file relative to the outdir.
+        * `rel_url` - the relative path from from_url to to_url.
 
 
 ## Example Config
 
+### redirects only (file)
+
+conf.py:
 ```python
-rediraffe_branch = "master"
+rediraffe_redirects = "redirects.txt"
+```
+redirects.txt:
+```
+another.rst index.rst
+another2.rst another.rst
 ```
 
-tests/roots/ext/
+### redirects only (dict)
+
+conf.py:
+```python
+rediraffe_redirects = {
+    "another.rst": "index.rst",
+    "another2.rst": "another.rst",
+}
+```
+
+### redirects + diff checker
+
+conf.py:
+```python
+rediraffe_redirects = "redirects.txt"
+rediraffe_branch = "master~1"
+```
+
+### redirects with jinja template
+
+conf.py:
+```python
+rediraffe_redirects = "redirects.txt"
+rediraffe_template = "template.html"
+```
+template.html:
+```html
+<html>
+    <body>
+        <p>Your destination is {{to_url}}</p>
+    </body>
+</html>
+```
+
+
+A complex example can be found at tests/roots/ext/.
