@@ -55,6 +55,7 @@ conf.py:
 ```python
 rediraffe_redirects = "redirects.txt"
 ```
+
 redirects.txt:
 ```
 another.rst index.rst
@@ -86,6 +87,7 @@ conf.py:
 rediraffe_redirects = "redirects.txt"
 rediraffe_template = "template.html"
 ```
+
 template.html:
 ```html
 <html>
@@ -95,5 +97,20 @@ template.html:
 </html>
 ```
 
-
 A complex example can be found at tests/roots/ext/.
+
+## Testing
+
+Rediraffe uses pytest for testing.
+To run tests:
+1. Install this package
+2. Install test dependencies
+    ```bash
+    python -m pip install -r test-requirements.txt
+    ```
+3. Navigate to the tests directory and run
+    ```bash
+    python -m pytest --headless
+    ```
+
+The `--headless` flag ensures that a browser window does not open during browser backed selenium testing.
