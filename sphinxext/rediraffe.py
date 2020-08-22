@@ -308,7 +308,6 @@ class CheckRedirectsDiffBuilder(Builder):
         return ""
 
 
-
 def setup(app: Sphinx) -> Dict[str, Any]:
     app.add_config_value("rediraffe_redirects", "", None)
     app.add_config_value("rediraffe_branch", "", None)
