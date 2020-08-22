@@ -4,17 +4,15 @@ from os.path import relpath
 from pathlib import Path
 from typing import Any, Dict, Union
 
+from jinja2 import Environment, FileSystemLoader, Template
 from sphinx.application import Sphinx
 from sphinx.builders import Builder
 from sphinx.builders.dirhtml import DirectoryHTMLBuilder
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.builders.linkcheck import CheckExternalLinksBuilder
 from sphinx.errors import ExtensionError
-
 from sphinx.util import logging
-from sphinx.util.console import yellow, green, red  # pylint: disable=no-name-in-module
-
-from jinja2 import Environment, FileSystemLoader, Template
+from sphinx.util.console import green, red, yellow  # pylint: disable=no-name-in-module
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +104,7 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     """
     Build amd write redirects
     """
-    
+
     if exception != None:
         return
 
