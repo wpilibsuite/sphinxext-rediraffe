@@ -170,6 +170,13 @@ class TestExtHtml:
         assert "from_url: another.html" in text
         assert "to_url: index.html" in text
 
+    @pytest.mark.sphinx("html", testroot="jinja_bad_path")
+    def test_jinja_bad_path(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+
+        ensure_redirect("another.html", "index.html")
+
 
 class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_redirects")
@@ -325,3 +332,11 @@ class TestExtDirHtml:
         assert "to_file: index.rst" in text
         assert "from_url: another/index.html" in text
         assert "to_url: index.html" in text
+
+    @pytest.mark.sphinx("dirhtml", testroot="jinja_bad_path")
+    def test_jinja_bad_path(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+
+        ensure_redirect("another/index.html", "index.html")
+

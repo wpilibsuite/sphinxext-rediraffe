@@ -122,7 +122,7 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     if isinstance(rediraffe_template, str):
         # path
         template_path = Path(app.srcdir) / rediraffe_template
-        if template_path.exists:
+        if template_path.exists():
             file_loader = FileSystemLoader(template_path.parent)
             env = Environment(loader=file_loader)
             rediraffe_template = env.get_template(template_path.name)
