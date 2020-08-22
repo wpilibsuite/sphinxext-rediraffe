@@ -339,4 +339,3 @@ class TestExtDirHtml:
         assert app.statuscode == 0
 
         ensure_redirect("another/index.html", "index.html")
-
