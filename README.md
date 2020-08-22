@@ -8,6 +8,8 @@ Sphinx Extension to redirect files
 This sphinx extension redirects non-existent pages to working pages.
 Additionally, a builder is provided to check that deleted/renamed files in your git repo are redirected. 
 
+Rediraffe supports the html and dirhtml builders.
+
 Note: Chained redirects will be resolved. For example, if a config has 6 chained redirects, all 6 links will redirect directly to the final link. The enduser will never experience more than 1 redirection.
 
 ## Installation
