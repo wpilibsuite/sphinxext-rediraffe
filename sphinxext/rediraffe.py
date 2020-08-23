@@ -298,13 +298,13 @@ class CheckRedirectsDiffBuilder(Builder):
     def get_outdated_docs(self):
         return []
 
-    def prepare_writing(self, docnames):
+    def prepare_writing(self=None, docnames=None):
         pass
 
-    def write_doc(self, docname, doctree):
+    def write_doc(self, docname=None, doctree=None):
         pass
 
-    def get_target_uri(self, docname, typ):
+    def get_target_uri(self, docname=None, typ=None):
         return ""
 
 
