@@ -1,8 +1,9 @@
+from os import rename
 import re
 import subprocess
 from os.path import relpath
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, Template
 from sphinx.application import Sphinx
@@ -257,32 +258,54 @@ class CheckRedirectsDiffBuilder(Builder):
             f"git -C {self.app.srcdir} rev-parse --show-toplevel", shell=True
         ).decode("utf-8")
 
+        def abs_path_in_src_dir_w_src_suffix(filename: str) -> Union[Path, None]:
+            abs_path = Path(path_to_git_repo.strip()) / filename.strip()
+            if not str(abs_path).startswith(str(src_path)):
+                return None
+            if abs_path.suffix not in source_suffixes:
+                return None
+            return abs_path
+
         # run git diff
-        deleted_files = subprocess.check_output(
-            f"git -C {self.app.srcdir} diff --diff-filter=AR --name-only HEAD {self.app.config.rediraffe_branch}",
-            shell=True,
+        renamed_files_out = (
+            subprocess.check_output(
+                f"git -C {self.app.srcdir} diff --name-status --diff-filter=R {self.app.config.rediraffe_branch}",
+                shell=True,
+            )
+            .decode("utf-8")
+            .splitlines()
         )
 
-        # splitlines
-        deleted_files = deleted_files.splitlines()
-        # convert to utf-8
-        deleted_files = [filename.decode("utf-8") for filename in deleted_files]
-        # convert to path
-        deleted_files = [Path(filename.strip()) for filename in deleted_files]
-        # to absolute path
+        rename_hints = {}
+        for line in renamed_files_out:
+            line = line.strip()
+            r_perc, rename_from, rename_to = re.split(r"\s+", line)
+            perc = int(r_perc[1:])
+            path_rename_from = abs_path_in_src_dir_w_src_suffix(rename_from)
+            path_rename_to = abs_path_in_src_dir_w_src_suffix(rename_to)
+
+            if path_rename_from == None:
+                continue
+            if path_rename_to == None:
+                continue
+
+            rename_hints[path_rename_from] = (path_rename_to, perc)
+
+        # run git diff
+        deleted_files = (
+            subprocess.check_output(
+                f"git -C {self.app.srcdir} diff --diff-filter=D --name-only {self.app.config.rediraffe_branch}",
+                shell=True,
+            )
+            .decode("utf-8")
+            .splitlines()
+        )
+
+        # to absolute path + filter out
         deleted_files = [
-            Path(path_to_git_repo.strip()) / filename for filename in deleted_files
+            abs_path_in_src_dir_w_src_suffix(filename) for filename in deleted_files
         ]
-        # in source dir
-        deleted_files = [
-            filename
-            for filename in deleted_files
-            if str(filename).startswith(str(src_path))
-        ]
-        # with source suffix
-        deleted_files = [
-            filename for filename in deleted_files if filename.suffix in source_suffixes
-        ]
+        deleted_files = list(filter(lambda x: x != None, deleted_files))
 
         for deleted_file in deleted_files:
             if deleted_file in absolute_redirects:
@@ -290,9 +313,22 @@ class CheckRedirectsDiffBuilder(Builder):
                     f"deleted file {deleted_file} redirects to {absolute_redirects[deleted_file]}."
                 )
             else:
-                logger.error(
-                    f'{red("(broken)")} {deleted_file} was deleted but is not redirected!'
+                err_msg = f'{red("(broken)")} {deleted_file} was deleted but is not redirected!'
+                logger.error(err_msg)
+                self.app.statuscode = 1
+
+        for renamed_file in rename_hints:
+            hint_to, perc = rename_hints[renamed_file]
+            if renamed_file in absolute_redirects:
+                logger.info(
+                    f"renamed file {renamed_file} redirects to {absolute_redirects[renamed_file]}."
                 )
+            else:
+                err_msg = (
+                    f"{red('(broken)')} {renamed_file} was deleted but is not redirected!"
+                    f" Hint: This file was renamed to {hint_to} with a similarity of {perc}%."
+                )
+                logger.error(err_msg)
                 self.app.statuscode = 1
 
     def get_outdated_docs(self):
