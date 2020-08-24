@@ -1,0 +1,2 @@
+deletedfolder/another.rst index.rst
+deletedfolder/deletedfolder2/another.rst index.rst

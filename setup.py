@@ -11,14 +11,14 @@ with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
 
 setuptools.setup(
-    name="sphinxext-linkcheckdiff",
+    name="sphinxext-rediraffe",
     version=version,
     author="Vasista Vovveti",
     author_email="vasistavovveti@gmail.com",
-    description="Sphinx Extension to run diff-only linkchecks",
+    description="Sphinx Extension that redirects non-existent pages to working pages.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/thetriplev/sphinxext-linkcheckdiff",
+    url="https://github.com/wpilibsuite/rediraffe",
     install_requires=["sphinx>=2.0"],
     packages=["sphinxext"],
     classifiers=[

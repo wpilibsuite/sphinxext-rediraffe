@@ -1,0 +1,79 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Black
+      run: |
+        pip install black
+    - name: Run Black
+      run: |
+        black --check --diff .
+
+  test:
+    name: "Build (${{ matrix.os }} Python ${{ matrix.python-version }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.6', '3.7', '3.8']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dev dependencies
+        shell: bash
+        run: |
+          set -xe
+          python -VV
+          python -m site
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r dev-requirements.txt
+      - name: Build wheel
+        run: |
+          python setup.py bdist_wheel
+      - name: Install wheel
+        shell: bash
+        run: |
+          python -m pip install dist/*.whl
+      - name: Install test dependencies
+        run: |
+          python -m pip install -r test-requirements.txt
+      - name: Run Tests
+        run: |
+          cd tests
+          python -m pytest -vv --headless
+
+  pypi-release:
+    if: startsWith(github.ref, 'refs/tags/v') && github.repository_owner	== 'wpilibsuite'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r dev-requirements.txt
+      - name: Build PyPI Wheel
+        run: |
+          python setup.py sdist
+          python setup.py bdist_wheel
+      - name: Publish a Python distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}

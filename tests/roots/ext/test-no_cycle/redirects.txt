@@ -1,0 +1,2 @@
+a.rst b.rst
+b.rst index.rst
