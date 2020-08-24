@@ -34,7 +34,7 @@ To check that deleted/renamed files in your git repo are in your redirects,
 These values are placed in the conf.py of your sphinx project.
 
 * `rediraffe_branch`
-    * Required for rediraffecheckdiff builder. The branch to diff against.
+    * Required for rediraffecheckdiff builder. The branch or commit to diff against.
 
 * `rediraffe_redirects`
     * Required. A filename or dict containing redirects
