@@ -1,4 +1,5 @@
 # sphinxext-rediraffe
+![ci](https://github.com/wpilibsuite/sphinxext-rediraffe/workflows/ci/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Sphinx Extension to redirect files
@@ -10,11 +11,11 @@ Additionally, a builder is provided to check that deleted/renamed files in your 
 
 Rediraffe supports the html and dirhtml builders.
 
-Note: Chained redirects will be resolved. For example, if a config has 6 chained redirects, all 6 links will redirect directly to the final link. The enduser will never experience more than 1 redirection.
+Note: Chained redirects will be resolved. For example, if a config has 6 chained redirects, all 6 links will redirect directly to the final link. The end user will never experience more than 1 redirection.
 
 ## Installation
 
-`python -m pip install git+https://github.com/wpilibsuite/sphinxext-rediraffe.git`
+`python -m pip install sphinxext-rediraffe`
 
 
 ## Usage
