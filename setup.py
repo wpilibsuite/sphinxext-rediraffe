@@ -15,7 +15,7 @@ setuptools.setup(
     version=version,
     author="Vasista Vovveti",
     author_email="vasistavovveti@gmail.com",
-    description="Sphinx Extension to run diff-only linkchecks",
+    description="Sphinx Extension that redirects non-existent pages to working pages.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/wpilibsuite/rediraffe",
