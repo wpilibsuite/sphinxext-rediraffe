@@ -53,3 +53,33 @@ def test_builder_link_redirected_twice(app_init_repo):
 def test_builder_bad_rediraffe_file(app_init_repo):
     app_init_repo.build()
     assert app_init_repo.statuscode == 1
+
+
+@pytest.mark.sphinx("rediraffecheckdiff", testroot="nested")
+def test_builder_nested(app_init_repo):
+    app_init_repo.build()
+    assert app_init_repo.statuscode == 0
+
+
+@pytest.mark.sphinx("rediraffecheckdiff", testroot="backslashes")
+def test_builder_backslashes(app_init_repo):
+    app_init_repo.build()
+    assert app_init_repo.statuscode == 0
+
+
+@pytest.mark.sphinx("rediraffecheckdiff", testroot="mixed_slashes")
+def test_builder_mixed_slashes(app_init_repo):
+    app_init_repo.build()
+    assert app_init_repo.statuscode == 0
+
+
+@pytest.mark.sphinx("rediraffecheckdiff", testroot="deleted_file_redirected_commit")
+def test_builder_deleted_file_redirected_commit(app_init_repo):
+    app_init_repo.build()
+    assert app_init_repo.statuscode == 0
+
+
+@pytest.mark.sphinx("rediraffecheckdiff", testroot="deleted_file_not_redirected_commit")
+def test_builder_deleted_file_not_redirected_commit(app_init_repo):
+    app_init_repo.build()
+    assert app_init_repo.statuscode == 1

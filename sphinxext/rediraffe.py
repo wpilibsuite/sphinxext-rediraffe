@@ -2,7 +2,7 @@ from os import rename
 import re
 import subprocess
 from os.path import relpath
-from pathlib import Path
+from pathlib import Path, PurePath, PureWindowsPath
 from typing import Any, Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, Template
@@ -174,10 +174,13 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
 
     # write redirects
     for src_redirect_from, src_redirect_to in redirects.items():
+        # Normalize path - src_redirect_.* is relative so drive letters aren't an issue.
+        src_redirect_from = Path(PureWindowsPath(src_redirect_from))
+        src_redirect_to = Path(PureWindowsPath(src_redirect_to))
 
         # relative paths from source dir (without ext)
-        redirect_from = Path(src_redirect_from).with_suffix("")
-        redirect_to = Path(src_redirect_to).with_suffix("")
+        redirect_from = src_redirect_from.with_suffix("")
+        redirect_to = src_redirect_to.with_suffix("")
 
         if type(app.builder) == DirectoryHTMLBuilder:
             master_doc = Path(app.config.master_doc).with_suffix("")
@@ -259,7 +262,7 @@ class CheckRedirectsDiffBuilder(Builder):
         ).decode("utf-8")
 
         def abs_path_in_src_dir_w_src_suffix(filename: str) -> Union[Path, None]:
-            abs_path = Path(path_to_git_repo.strip()) / filename.strip()
+            abs_path = (Path(path_to_git_repo.strip()) / filename.strip()).resolve()
             if not str(abs_path).startswith(str(src_path)):
                 return None
             if abs_path.suffix not in source_suffixes:

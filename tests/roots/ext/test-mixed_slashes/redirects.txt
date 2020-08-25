@@ -1,0 +1,5 @@
+tof1.rst                  docs\folder1/f1.rst
+docs\folder1\tof1.rst     docs/folder1\f1.rst
+docs/folder1\tof2.rst     docs\folder2\f2.rst
+docs\folder2/toindex.rst  index.rst
+totoindex.rst             docs/folder2/toindex.rst   
