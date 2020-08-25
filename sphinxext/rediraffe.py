@@ -193,6 +193,12 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         build_redirect_from = Path(app.outdir) / redirect_from
         build_redirect_to = Path(app.outdir) / redirect_to
 
+        # resolve all paths
+        redirect_from = redirect_from.resolve()
+        redirect_to = redirect_to.resolve()
+        build_redirect_from = build_redirect_from.resolve()
+        build_redirect_to = build_redirect_to.resolve()
+
         if build_redirect_from.exists():
             logger.warning(
                 f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_from} already exists!'
