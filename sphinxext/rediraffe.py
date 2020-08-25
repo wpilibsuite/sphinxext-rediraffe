@@ -259,7 +259,7 @@ class CheckRedirectsDiffBuilder(Builder):
         ).decode("utf-8")
 
         def abs_path_in_src_dir_w_src_suffix(filename: str) -> Union[Path, None]:
-            abs_path = Path(path_to_git_repo.strip()) / filename.strip()
+            abs_path = (Path(path_to_git_repo.strip()) / filename.strip()).resolve()
             if not str(abs_path).startswith(str(src_path)):
                 return None
             if abs_path.suffix not in source_suffixes:

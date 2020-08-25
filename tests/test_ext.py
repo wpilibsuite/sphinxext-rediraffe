@@ -50,6 +50,26 @@ class TestExtHtml:
         ensure_redirect("docs/folder2/toindex.html", "index.html")
         ensure_redirect("totoindex.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="backslashes")
+    def test_backslashes(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof2.html", "docs/folder2/f2.html")
+        ensure_redirect("docs/folder2/toindex.html", "index.html")
+        ensure_redirect("totoindex.html", "index.html")
+
+    @pytest.mark.sphinx("html", testroot="mixed_slashes")
+    def test_mixed_slashes(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof2.html", "docs/folder2/f2.html")
+        ensure_redirect("docs/folder2/toindex.html", "index.html")
+        ensure_redirect("totoindex.html", "index.html")
+
     @pytest.mark.sphinx("html", testroot="link_redirected_twice")
     def test_link_redirected_twice(self, app: Sphinx):
         with pytest.raises(ExtensionError):
@@ -205,6 +225,26 @@ class TestExtDirHtml:
 
     @pytest.mark.sphinx("dirhtml", testroot="nested")
     def test_nested(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
+        ensure_redirect("docs/folder2/toindex/index.html", "index.html")
+        ensure_redirect("totoindex/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="backslashes")
+    def test_backslashes(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
+        ensure_redirect("docs/folder2/toindex/index.html", "index.html")
+        ensure_redirect("totoindex/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="mixed_slashes")
+    def test_mixed_slashes(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
         ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
