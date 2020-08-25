@@ -32,6 +32,7 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 """
 )
 
+RE_OBJ = re.compile(r'(?:\"(.*?)\"|(\S+))\s+(?:\"(.*?)\"|(\S+))')
 
 def create_graph(path: Path) -> Dict[str, str]:
     """
@@ -44,7 +45,9 @@ def create_graph(path: Path) -> Dict[str, str]:
             line = line.strip()
             if len(line) == 0:
                 continue
-            edge_from, edge_to, *_ = re.split(r"\s+", line)
+            match = RE_OBJ.match(line)
+            edge_from = match.group(1) or match.group(2)
+            edge_to = match.group(3) or match.group(4)
             if edge_from in graph_edges:
                 # Duplicate vertices not allowed / Vertices can only have 1 outgoing edge
                 logger.error(
