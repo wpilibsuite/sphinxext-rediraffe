@@ -2,7 +2,7 @@ from os import rename
 import re
 import subprocess
 from os.path import relpath
-from pathlib import Path
+from pathlib import Path, PurePath, PureWindowsPath
 from typing import Any, Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, Template
@@ -174,10 +174,13 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
 
     # write redirects
     for src_redirect_from, src_redirect_to in redirects.items():
+        # Normalize path - src_redirect_.* is relative so drive letters aren't an issue.
+        src_redirect_from = Path(PureWindowsPath(src_redirect_from))
+        src_redirect_to = Path(PureWindowsPath(src_redirect_to))
 
         # relative paths from source dir (without ext)
-        redirect_from = Path(src_redirect_from).with_suffix("")
-        redirect_to = Path(src_redirect_to).with_suffix("")
+        redirect_from = src_redirect_from.with_suffix("")
+        redirect_to = src_redirect_to.with_suffix("")
 
         if type(app.builder) == DirectoryHTMLBuilder:
             master_doc = Path(app.config.master_doc).with_suffix("")
@@ -192,12 +195,6 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         # absolute paths into the build dir
         build_redirect_from = Path(app.outdir) / redirect_from
         build_redirect_to = Path(app.outdir) / redirect_to
-
-        # resolve all paths
-        redirect_from = redirect_from.resolve()
-        redirect_to = redirect_to.resolve()
-        build_redirect_from = build_redirect_from.resolve()
-        build_redirect_to = build_redirect_to.resolve()
 
         if build_redirect_from.exists():
             logger.warning(
