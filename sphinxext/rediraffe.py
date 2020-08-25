@@ -32,7 +32,8 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 """
 )
 
-RE_OBJ = re.compile(r'(?:\"(.*?)\"|(\S+))\s+(?:\"(.*?)\"|(\S+))')
+RE_OBJ = re.compile(r"(?:\"(.*?)\"|(\S+))\s+(?:\"(.*?)\"|(\S+))")
+
 
 def create_graph(path: Path) -> Dict[str, str]:
     """
