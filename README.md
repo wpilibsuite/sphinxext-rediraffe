@@ -61,9 +61,12 @@ rediraffe_redirects = "redirects.txt"
 
 redirects.txt:
 ```
-another.rst index.rst
-another2.rst another.rst
+"another file.rst" index.rst
+another2.rst 'another file.rst'
 ```
+
+Note: Filepaths can be wrapped in quotes (single or double).
+This is especially useful for filepaths containing spaces.
 
 ### redirects only (dict)
 
