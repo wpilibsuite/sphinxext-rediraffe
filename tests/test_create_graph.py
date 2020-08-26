@@ -63,8 +63,8 @@ def test_create_graph_link_redirected_lots(tmp_path):
     with pytest.raises(ExtensionError):
         graph = create_graph(path)
 
-class TestCreateGraphQuotes:
 
+class TestCreateGraphQuotes:
     def test_no_quotes(self, tmp_path):
         path = tmp_path / "rediraffe.txt"
         path.write_text(

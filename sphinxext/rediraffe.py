@@ -42,7 +42,7 @@ def create_graph(path: Path) -> Dict[str, str]:
     graph_edges = {}
     broken = False
     with open(path, "r") as file:
-        for line_num,  line in enumerate(file):
+        for line_num, line in enumerate(file):
             line = line.strip()
             if len(line) == 0:
                 continue
@@ -50,9 +50,7 @@ def create_graph(path: Path) -> Dict[str, str]:
 
             if match == None:
                 logger.error(
-                    red(
-                        f"rediraffe: line {line_num} of the redirects is invalid!"
-                    )
+                    red(f"rediraffe: line {line_num} of the redirects is invalid!")
                 )
                 broken = True
                 continue
