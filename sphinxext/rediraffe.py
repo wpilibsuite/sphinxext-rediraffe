@@ -32,6 +32,8 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 """
 )
 
+RE_OBJ = re.compile(r"(?:(\"|')(.*?)\1|(\S+))\s+(?:(\"|')(.*?)\4|(\S+))")
+
 
 def create_graph(path: Path) -> Dict[str, str]:
     """
@@ -40,11 +42,21 @@ def create_graph(path: Path) -> Dict[str, str]:
     graph_edges = {}
     broken = False
     with open(path, "r") as file:
-        for line in file:
+        for line_num, line in enumerate(file):
             line = line.strip()
             if len(line) == 0:
                 continue
-            edge_from, edge_to, *_ = re.split(r"\s+", line)
+            match = RE_OBJ.fullmatch(line)
+
+            if match == None:
+                logger.error(
+                    red(f"rediraffe: line {line_num} of the redirects is invalid!")
+                )
+                broken = True
+                continue
+
+            edge_from = match.group(2) or match.group(3)
+            edge_to = match.group(5) or match.group(6)
             if edge_from in graph_edges:
                 # Duplicate vertices not allowed / Vertices can only have 1 outgoing edge
                 logger.error(
@@ -55,7 +67,7 @@ def create_graph(path: Path) -> Dict[str, str]:
                 broken = True
             graph_edges[edge_from] = edge_to
     if broken:
-        err_msg = f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
+        err_msg = f"rediraffe: Error(s) in parsing the redirects file."
         logger.error(err_msg)
         raise ExtensionError(err_msg)
     return graph_edges
