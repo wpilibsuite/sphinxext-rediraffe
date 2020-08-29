@@ -358,6 +358,9 @@ class CheckRedirectsDiffBuilder(Builder):
     def get_target_uri(self, docname=None, typ=None):
         return ""
 
+    def read(self):
+        return []
+
 
 def setup(app: Sphinx) -> Dict[str, Any]:
     app.add_config_value("rediraffe_redirects", "", None)
