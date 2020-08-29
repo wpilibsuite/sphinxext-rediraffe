@@ -2,7 +2,7 @@ from os import rename
 import re
 import subprocess
 from os.path import relpath
-from pathlib import Path, PurePath, PureWindowsPath
+from pathlib import Path, PurePath, PureWindowsPath, PurePosixPath
 from typing import Any, Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, Template
@@ -224,7 +224,13 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         with build_redirect_from.open("w") as f:
             f.write(
                 rediraffe_template.render(
-                    rel_url=relpath(build_redirect_to, build_redirect_from.parent),
+                    rel_url=str(
+                        PurePosixPath(
+                            PureWindowsPath(
+                                relpath(build_redirect_to, build_redirect_from.parent)
+                            )
+                        )
+                    ),
                     from_file=src_redirect_from,
                     to_file=src_redirect_to,
                     from_url=redirect_from,
