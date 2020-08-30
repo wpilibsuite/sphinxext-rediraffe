@@ -5,6 +5,7 @@ from sphinx.testing.path import path
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
 from pathlib import Path
+import shutil
 import logging
 
 from conftest import rel2url
@@ -27,6 +28,16 @@ class TestExtHtml:
         assert app.statuscode == 0
         ensure_redirect("another.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="simple")
+    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+        if Path(app.outdir).exists():
+            shutil.rmtree(Path(app.outdir))
+        app.build()
+        assert app.statuscode == 0
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("another.html", "index.html")
+
     @pytest.mark.sphinx("html", testroot="no_cycle")
     def test_no_cycle(self, app: Sphinx, ensure_redirect):
         app.build()
@@ -42,6 +53,26 @@ class TestExtHtml:
 
     @pytest.mark.sphinx("html", testroot="nested")
     def test_nested(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof2.html", "docs/folder2/f2.html")
+        ensure_redirect("docs/folder2/toindex.html", "index.html")
+        ensure_redirect("totoindex.html", "index.html")
+
+    @pytest.mark.sphinx("html", testroot="backslashes")
+    def test_backslashes(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof1.html", "docs/folder1/f1.html")
+        ensure_redirect("docs/folder1/tof2.html", "docs/folder2/f2.html")
+        ensure_redirect("docs/folder2/toindex.html", "index.html")
+        ensure_redirect("totoindex.html", "index.html")
+
+    @pytest.mark.sphinx("html", testroot="mixed_slashes")
+    def test_mixed_slashes(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
         ensure_redirect("tof1.html", "docs/folder1/f1.html")
@@ -74,7 +105,8 @@ class TestExtHtml:
     @pytest.mark.sphinx("html", testroot="no_rediraffe_file")
     def test_no_rediraffe_file(self, app: Sphinx):
         app.build()
-        assert app.statuscode == 1
+        assert app.statuscode == 0
+        assert "rediraffe was not given redirects to process" in app._warning.getvalue()
 
     @pytest.mark.sphinx("html", testroot="redirect_from_deleted_folder")
     def test_redirect_from_deleted_folder(self, app: Sphinx, ensure_redirect):
@@ -177,6 +209,55 @@ class TestExtHtml:
 
         ensure_redirect("another.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="pass_url_fragments_queries")
+    def test_pass_url_fragments(self, app: Sphinx, _sb: BaseCase, ensure_redirect):
+        app.build()
+
+        ensure_redirect("another.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another.html") + "#haha")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return  window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check hash
+        assert "#haha" == _sb.execute_script("return window.location.hash")
+
+    @pytest.mark.sphinx("html", testroot="pass_url_fragments_queries")
+    def test_pass_url_queries(self, app: Sphinx, _sb: BaseCase, ensure_redirect):
+        app.build()
+
+        ensure_redirect("another.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another.html") + "?phrase=haha")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check query
+        assert "?phrase=haha" == _sb.execute_script("return window.location.search")
+
+    @pytest.mark.sphinx("html", testroot="pass_url_fragments_queries")
+    def test_pass_url_fragment_and_query(
+        self, app: Sphinx, _sb: BaseCase, ensure_redirect
+    ):
+        app.build()
+
+        ensure_redirect("another.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another.html") + "?phrase=haha#giraffe")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check query
+        assert "?phrase=haha" == _sb.execute_script("return window.location.search")
+        # check hash
+        assert "#giraffe" == _sb.execute_script("return window.location.hash")
+
 
 class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_redirects")
@@ -186,6 +267,16 @@ class TestExtDirHtml:
 
     @pytest.mark.sphinx("dirhtml", testroot="simple")
     def test_simple(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("another/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="simple", freshenv=False)
+    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+        if Path(app.outdir).exists():
+            shutil.rmtree(Path(app.outdir))
+        app.build()
+        assert app.statuscode == 0
         app.build()
         assert app.statuscode == 0
         ensure_redirect("another/index.html", "index.html")
@@ -205,6 +296,26 @@ class TestExtDirHtml:
 
     @pytest.mark.sphinx("dirhtml", testroot="nested")
     def test_nested(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
+        ensure_redirect("docs/folder2/toindex/index.html", "index.html")
+        ensure_redirect("totoindex/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="backslashes")
+    def test_backslashes(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
+        ensure_redirect("docs/folder2/toindex/index.html", "index.html")
+        ensure_redirect("totoindex/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="mixed_slashes")
+    def test_mixed_slashes(self, app: Sphinx, ensure_redirect):
         app.build()
         assert app.statuscode == 0
         ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
@@ -237,7 +348,8 @@ class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_rediraffe_file")
     def test_no_rediraffe_file(self, app: Sphinx):
         app.build()
-        assert app.statuscode == 1
+        assert app.statuscode == 0
+        assert "rediraffe was not given redirects to process" in app._warning.getvalue()
 
     @pytest.mark.sphinx("dirhtml", testroot="redirect_from_deleted_folder")
     def test_redirect_from_deleted_folder(self, app: Sphinx, ensure_redirect):
@@ -339,3 +451,52 @@ class TestExtDirHtml:
         assert app.statuscode == 0
 
         ensure_redirect("another/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="pass_url_fragments_queries")
+    def test_pass_url_fragments(self, app: Sphinx, _sb: BaseCase, ensure_redirect):
+        app.build()
+
+        ensure_redirect("another/index.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another/index.html") + "#haha")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return  window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check hash
+        assert "#haha" == _sb.execute_script("return window.location.hash")
+
+    @pytest.mark.sphinx("dirhtml", testroot="pass_url_fragments_queries")
+    def test_pass_url_queries(self, app: Sphinx, _sb: BaseCase, ensure_redirect):
+        app.build()
+
+        ensure_redirect("another/index.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another/index.html") + "?phrase=haha")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check query
+        assert "?phrase=haha" == _sb.execute_script("return window.location.search")
+
+    @pytest.mark.sphinx("dirhtml", testroot="pass_url_fragments_queries")
+    def test_pass_url_fragment_and_query(
+        self, app: Sphinx, _sb: BaseCase, ensure_redirect
+    ):
+        app.build()
+
+        ensure_redirect("another/index.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another/index.html") + "?phrase=haha#giraffe")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check query
+        assert "?phrase=haha" == _sb.execute_script("return window.location.search")
+        # check hash
+        assert "#giraffe" == _sb.execute_script("return window.location.hash")

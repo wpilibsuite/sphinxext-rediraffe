@@ -2,19 +2,18 @@ name: ci
 on: [push, pull_request]
 
 jobs:
+
   check-format:
+
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - name: Install Black
-      run: |
-        pip install black
-    - name: Run Black
-      run: |
-        black --check --diff .
+    - uses: pre-commit/action@v2.0.0
 
   test:
     name: "Build (${{ matrix.os }} Python ${{ matrix.python-version }})"

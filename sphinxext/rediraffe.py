@@ -2,7 +2,7 @@ from os import rename
 import re
 import subprocess
 from os.path import relpath
-from pathlib import Path
+from pathlib import Path, PurePath, PureWindowsPath, PurePosixPath
 from typing import Any, Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, Template
@@ -21,16 +21,23 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
     """
 <html>
     <head>
-        <meta http-equiv="refresh" content="0; url={{rel_url}}"/>
+        <noscript>
+            <meta http-equiv="refresh" content="0; url={{rel_url}}"/>
+        </noscript>
     </head>
     <body>
         <p>You should have been redirected.</p>
         <a href="{{rel_url}}">If not, click here to continue.</a>
+        <script>
+            window.location.href = '{{rel_url}}' + (window.location.search || '') + (window.location.hash || '');
+        </script>
     </body>
 </html>
 
 """
 )
+
+RE_OBJ = re.compile(r"(?:(\"|')(.*?)\1|(\S+))\s+(?:(\"|')(.*?)\4|(\S+))")
 
 
 def create_graph(path: Path) -> Dict[str, str]:
@@ -40,11 +47,21 @@ def create_graph(path: Path) -> Dict[str, str]:
     graph_edges = {}
     broken = False
     with open(path, "r") as file:
-        for line in file:
+        for line_num, line in enumerate(file):
             line = line.strip()
             if len(line) == 0:
                 continue
-            edge_from, edge_to, *_ = re.split(r"\s+", line)
+            match = RE_OBJ.fullmatch(line)
+
+            if match == None:
+                logger.error(
+                    red(f"rediraffe: line {line_num} of the redirects is invalid!")
+                )
+                broken = True
+                continue
+
+            edge_from = match.group(2) or match.group(3)
+            edge_to = match.group(5) or match.group(6)
             if edge_from in graph_edges:
                 # Duplicate vertices not allowed / Vertices can only have 1 outgoing edge
                 logger.error(
@@ -55,7 +72,7 @@ def create_graph(path: Path) -> Dict[str, str]:
                 broken = True
             graph_edges[edge_from] = edge_to
     if broken:
-        err_msg = f"rediraffe: Some links are redirected multiple times. They should only be redirected once."
+        err_msg = f"rediraffe: Error(s) in parsing the redirects file."
         logger.error(err_msg)
         raise ExtensionError(err_msg)
     return graph_edges
@@ -105,6 +122,10 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     """
     Build amd write redirects
     """
+    try:
+        app.env.redirected
+    except AttributeError:
+        app.env.redirected = {}
 
     if exception != None:
         return
@@ -174,10 +195,13 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
 
     # write redirects
     for src_redirect_from, src_redirect_to in redirects.items():
+        # Normalize path - src_redirect_.* is relative so drive letters aren't an issue.
+        src_redirect_from = Path(PureWindowsPath(src_redirect_from))
+        src_redirect_to = Path(PureWindowsPath(src_redirect_to))
 
         # relative paths from source dir (without ext)
-        redirect_from = Path(src_redirect_from).with_suffix("")
-        redirect_to = Path(src_redirect_to).with_suffix("")
+        redirect_from = src_redirect_from.with_suffix("")
+        redirect_to = src_redirect_to.with_suffix("")
 
         if type(app.builder) == DirectoryHTMLBuilder:
             master_doc = Path(app.config.master_doc).with_suffix("")
@@ -192,6 +216,19 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         # absolute paths into the build dir
         build_redirect_from = Path(app.outdir) / redirect_from
         build_redirect_to = Path(app.outdir) / redirect_to
+
+        if (
+            build_redirect_from.exists()
+            and src_redirect_from.as_posix() in app.env.redirected
+        ):
+            # if it is still pointing to the same source, continue
+            if (
+                app.env.redirected[src_redirect_from.as_posix()]
+                == src_redirect_to.as_posix()
+            ):
+                continue
+            # otherwise remove and rewrite
+            build_redirect_from.unlink()
 
         if build_redirect_from.exists():
             logger.warning(
@@ -209,7 +246,13 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         with build_redirect_from.open("w") as f:
             f.write(
                 rediraffe_template.render(
-                    rel_url=relpath(build_redirect_to, build_redirect_from.parent),
+                    rel_url=str(
+                        PurePosixPath(
+                            PureWindowsPath(
+                                relpath(build_redirect_to, build_redirect_from.parent)
+                            )
+                        )
+                    ),
                     from_file=src_redirect_from,
                     to_file=src_redirect_to,
                     from_url=redirect_from,
@@ -219,6 +262,9 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
             logger.info(
                 f'{green("(good)")} {redirect_from} {green("-->")} {redirect_to}'
             )
+            app.env.redirected[
+                src_redirect_from.as_posix()
+            ] = src_redirect_to.as_posix()
 
 
 class CheckRedirectsDiffBuilder(Builder):
@@ -231,16 +277,17 @@ class CheckRedirectsDiffBuilder(Builder):
         src_path = Path(self.app.srcdir)
 
         rediraffe_redirects = self.app.config.rediraffe_redirects
+        redirects_path = None
         if isinstance(rediraffe_redirects, dict):
             pass
         elif isinstance(rediraffe_redirects, str):
-            path = Path(src_path) / rediraffe_redirects
-            if not path.is_file():
+            redirects_path = Path(src_path) / rediraffe_redirects
+            if not redirects_path.is_file():
                 logger.error(red("rediraffe: rediraffe_redirects file does not exist."))
                 self.app.statuscode = 1
                 return
             try:
-                rediraffe_redirects = create_graph(path)
+                rediraffe_redirects = create_graph(redirects_path)
             except ExtensionError as e:
                 self.app.statuscode = 1
                 return
@@ -259,7 +306,7 @@ class CheckRedirectsDiffBuilder(Builder):
         ).decode("utf-8")
 
         def abs_path_in_src_dir_w_src_suffix(filename: str) -> Union[Path, None]:
-            abs_path = Path(path_to_git_repo.strip()) / filename.strip()
+            abs_path = (Path(path_to_git_repo.strip()) / filename.strip()).resolve()
             if not str(abs_path).startswith(str(src_path)):
                 return None
             if abs_path.suffix not in source_suffixes:
@@ -288,7 +335,6 @@ class CheckRedirectsDiffBuilder(Builder):
                 continue
             if path_rename_to == None:
                 continue
-
             rename_hints[path_rename_from] = (path_rename_to, perc)
 
         # run git diff
@@ -317,13 +363,29 @@ class CheckRedirectsDiffBuilder(Builder):
                 logger.error(err_msg)
                 self.app.statuscode = 1
 
-        for renamed_file in rename_hints:
-            hint_to, perc = rename_hints[renamed_file]
-            if renamed_file in absolute_redirects:
-                logger.info(
-                    f"renamed file {renamed_file} redirects to {absolute_redirects[renamed_file]}."
-                )
-            else:
+        with redirects_path.open("a") as redirects_file:
+
+            for renamed_file in rename_hints:
+                hint_to, perc = rename_hints[renamed_file]
+
+                if renamed_file in absolute_redirects:
+                    logger.info(
+                        f"renamed file {renamed_file} redirects to {absolute_redirects[renamed_file]}."
+                    )
+                    continue
+
+                if self.name == "rediraffewritediff":
+                    if perc >= self.app.config.rediraffe_auto_redirect_perc:
+                        rel_rename_from = f'"{str(PurePosixPath(renamed_file.relative_to(src_path)))}"'
+                        rel_rename_to = (
+                            f'"{str(PurePosixPath(hint_to.relative_to(src_path)))}"'
+                        )
+                        redirects_file.write(f"{rel_rename_from} {rel_rename_to}\n")
+                        logger.info(
+                            f"{green('(okay)')} Renamed file {rel_rename_from} has been redirected to {rel_rename_to} in your redirects file!"
+                        )
+                        continue
+
                 err_msg = (
                     f"{red('(broken)')} {renamed_file} was deleted but is not redirected!"
                     f" Hint: This file was renamed to {hint_to} with a similarity of {perc}%."
@@ -343,13 +405,33 @@ class CheckRedirectsDiffBuilder(Builder):
     def get_target_uri(self, docname=None, typ=None):
         return ""
 
+    def read(self):
+        return []
+
+
+class WriteRedirectsDiffBuilder(CheckRedirectsDiffBuilder):
+    name = "rediraffewritediff"
+
+    def init(self) -> None:
+        rediraffe_redirects = self.app.config.rediraffe_redirects
+        if not isinstance(rediraffe_redirects, str):
+            logger.error(
+                f"{red('(broken)')} Automatic redirects is only available with a redirects file."
+            )
+            self.app.statuscode = 1
+            return
+
+        super().init()
+
 
 def setup(app: Sphinx) -> Dict[str, Any]:
-    app.add_config_value("rediraffe_redirects", "", None)
+    app.add_config_value("rediraffe_redirects", None, None)
     app.add_config_value("rediraffe_branch", "", None)
     app.add_config_value("rediraffe_template", None, None)
+    app.add_config_value("rediraffe_auto_redirect_perc", 100, None)
 
     app.add_builder(CheckRedirectsDiffBuilder)
+    app.add_builder(WriteRedirectsDiffBuilder)
     app.connect("build-finished", build_redirects)
 
     return {
