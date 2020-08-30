@@ -212,9 +212,15 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         build_redirect_from = Path(app.outdir) / redirect_from
         build_redirect_to = Path(app.outdir) / redirect_to
 
-        if build_redirect_from.exists() and src_redirect_from.as_posix() in app.env.redirected:
+        if (
+            build_redirect_from.exists()
+            and src_redirect_from.as_posix() in app.env.redirected
+        ):
             # if it is still pointing to the same source, continue
-            if app.env.redirected[src_redirect_from.as_posix()] == src_redirect_to.as_posix():
+            if (
+                app.env.redirected[src_redirect_from.as_posix()]
+                == src_redirect_to.as_posix()
+            ):
                 continue
             # otherwise remove and rewrite
             build_redirect_from.unlink()
@@ -251,7 +257,9 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
             logger.info(
                 f'{green("(good)")} {redirect_from} {green("-->")} {redirect_to}'
             )
-            app.env.redirected[src_redirect_from.as_posix()] = src_redirect_to.as_posix()
+            app.env.redirected[
+                src_redirect_from.as_posix()
+            ] = src_redirect_to.as_posix()
 
 
 class CheckRedirectsDiffBuilder(Builder):
