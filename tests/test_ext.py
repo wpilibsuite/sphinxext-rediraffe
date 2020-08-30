@@ -94,7 +94,8 @@ class TestExtHtml:
     @pytest.mark.sphinx("html", testroot="no_rediraffe_file")
     def test_no_rediraffe_file(self, app: Sphinx):
         app.build()
-        assert app.statuscode == 1
+        assert app.statuscode == 0
+        assert "rediraffe was not given redirects to process" in app._warning.getvalue()
 
     @pytest.mark.sphinx("html", testroot="redirect_from_deleted_folder")
     def test_redirect_from_deleted_folder(self, app: Sphinx, ensure_redirect):
@@ -277,7 +278,8 @@ class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_rediraffe_file")
     def test_no_rediraffe_file(self, app: Sphinx):
         app.build()
-        assert app.statuscode == 1
+        assert app.statuscode == 0
+        assert "rediraffe was not given redirects to process" in app._warning.getvalue()
 
     @pytest.mark.sphinx("dirhtml", testroot="redirect_from_deleted_folder")
     def test_redirect_from_deleted_folder(self, app: Sphinx, ensure_redirect):
