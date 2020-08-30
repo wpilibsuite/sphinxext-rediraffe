@@ -5,6 +5,7 @@ from sphinx.testing.path import path
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
 from pathlib import Path
+import shutil
 import logging
 
 from conftest import rel2url
@@ -23,6 +24,16 @@ class TestExtHtml:
 
     @pytest.mark.sphinx("html", testroot="simple")
     def test_simple(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("another.html", "index.html")
+
+    @pytest.mark.sphinx("html", testroot="simple")
+    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+        if Path(app.outdir).exists():
+            shutil.rmtree(Path(app.outdir))
+        app.build()
+        assert app.statuscode == 0
         app.build()
         assert app.statuscode == 0
         ensure_redirect("another.html", "index.html")
@@ -207,6 +218,16 @@ class TestExtDirHtml:
 
     @pytest.mark.sphinx("dirhtml", testroot="simple")
     def test_simple(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("another/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="simple", freshenv=False)
+    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+        if Path(app.outdir).exists():
+            shutil.rmtree(Path(app.outdir))
+        app.build()
+        assert app.statuscode == 0
         app.build()
         assert app.statuscode == 0
         ensure_redirect("another/index.html", "index.html")
