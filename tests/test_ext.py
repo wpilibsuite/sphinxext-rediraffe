@@ -197,6 +197,55 @@ class TestExtHtml:
 
         ensure_redirect("another.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="pass_url_fragments_queries")
+    def test_pass_url_fragments(self, app: Sphinx, _sb: BaseCase, ensure_redirect):
+        app.build()
+
+        ensure_redirect("another.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another.html") + "#haha")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return  window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check hash
+        assert "#haha" == _sb.execute_script("return window.location.hash")
+
+    @pytest.mark.sphinx("html", testroot="pass_url_fragments_queries")
+    def test_pass_url_queries(self, app: Sphinx, _sb: BaseCase, ensure_redirect):
+        app.build()
+
+        ensure_redirect("another.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another.html") + "?phrase=haha")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check query
+        assert "?phrase=haha" == _sb.execute_script("return window.location.search")
+
+    @pytest.mark.sphinx("html", testroot="pass_url_fragments_queries")
+    def test_pass_url_fragment_and_query(
+        self, app: Sphinx, _sb: BaseCase, ensure_redirect
+    ):
+        app.build()
+
+        ensure_redirect("another.html", "index.html")
+        _sb.open(rel2url(app.outdir, "another.html") + "?phrase=haha#giraffe")
+        # check url
+        assert Path(rel2url(app.outdir, "index.html")) == Path(
+            _sb.execute_script(
+                'return window.location.protocol + "//" + window.location.host + "/" + window.location.pathname'
+            )
+        )
+        # check query
+        assert "?phrase=haha" == _sb.execute_script("return window.location.search")
+        # check hash
+        assert "#giraffe" == _sb.execute_script("return window.location.hash")
+
 
 class TestExtDirHtml:
     @pytest.mark.sphinx("dirhtml", testroot="no_redirects")
