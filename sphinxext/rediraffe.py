@@ -400,7 +400,7 @@ class WriteRedirectsDiffBuilder(CheckRedirectsDiffBuilder):
 
 
 def setup(app: Sphinx) -> Dict[str, Any]:
-    app.add_config_value("rediraffe_redirects", "", None)
+    app.add_config_value("rediraffe_redirects", None, None)
     app.add_config_value("rediraffe_branch", "", None)
     app.add_config_value("rediraffe_template", None, None)
     app.add_config_value("rediraffe_auto_redirect_perc", 100, None)
