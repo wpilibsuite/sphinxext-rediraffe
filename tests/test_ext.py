@@ -221,7 +221,7 @@ class TestExtDirHtml:
         assert app.statuscode == 0
         ensure_redirect("another/index.html", "index.html")
 
-    @pytest.mark.sphinx("html", testroot="simple", freshenv=False)
+    @pytest.mark.sphinx("dirhtml", testroot="simple", freshenv=False)
     def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
         if Path(app.outdir).exists():
             shutil.rmtree(Path(app.outdir))
@@ -229,7 +229,7 @@ class TestExtDirHtml:
         assert app.statuscode == 0
         app.build()
         assert app.statuscode == 0
-        ensure_redirect("another.html", "index.html")
+        ensure_redirect("another/index.html", "index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="no_cycle")
     def test_no_cycle(self, app: Sphinx, ensure_redirect):
