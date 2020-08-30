@@ -21,11 +21,16 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
     """
 <html>
     <head>
-        <meta http-equiv="refresh" content="0; url={{rel_url}}"/>
+        <noscript>
+            <meta http-equiv="refresh" content="0; url={{rel_url}}"/>
+        </noscript>
     </head>
     <body>
         <p>You should have been redirected.</p>
         <a href="{{rel_url}}">If not, click here to continue.</a>
+        <script>
+            window.location.href = '{{rel_url}}' + (window.location.search || '') + (window.location.hash || '');
+        </script>
     </body>
 </html>
 
