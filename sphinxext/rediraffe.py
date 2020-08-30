@@ -39,6 +39,8 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 
 RE_OBJ = re.compile(r"(?:(\"|')(.*?)\1|(\S+))\s+(?:(\"|')(.*?)\4|(\S+))")
 
+READTHEDOCS_BUILDERS = ["readthedocs", "readthedocsdirhtml"]
+
 
 def create_graph(path: Path) -> Dict[str, str]:
     """
@@ -134,7 +136,10 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         logger.info("rediraffe: Redirect generation skipped for linkcheck builders.")
         return
 
-    if type(app.builder) not in (StandaloneHTMLBuilder, DirectoryHTMLBuilder):
+    if (
+        type(app.builder) not in (StandaloneHTMLBuilder, DirectoryHTMLBuilder)
+        and app.builder.name not in READTHEDOCS_BUILDERS
+    ):
         logger.info(
             "rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml"
         )
