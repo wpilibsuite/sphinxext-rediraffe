@@ -141,7 +141,7 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         and app.builder.name not in READTHEDOCS_BUILDERS
     ):
         logger.info(
-            "rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml"
+            "rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml, readthedocs, readthedocsdirhtml."
         )
         return
 
