@@ -27,6 +27,14 @@ class TestExtHtml:
         assert app.statuscode == 0
         ensure_redirect("another.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="simple_rebuild")
+    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("another.html", "index.html")
+
     @pytest.mark.sphinx("html", testroot="no_cycle")
     def test_no_cycle(self, app: Sphinx, ensure_redirect):
         app.build()
