@@ -37,7 +37,7 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 
 """
 )
-
+REDIRECT_JSON_NAME = "_rediraffe_redirected.json"
 RE_OBJ = re.compile(r"(?:(\"|')(.*?)\1|(\S+))\s+(?:(\"|')(.*?)\4|(\S+))")
 
 READTHEDOCS_BUILDERS = ["readthedocs", "readthedocsdirhtml"]
@@ -125,7 +125,7 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     """
     Build amd write redirects
     """
-    redirect_json_file = Path(app.outdir) / "redirect.json"
+    redirect_json_file = Path(app.outdir) / REDIRECT_JSON_NAME
     if redirect_json_file.exists():
         redirect_record = json.loads(redirect_json_file.read_text("utf8"))
     else:
