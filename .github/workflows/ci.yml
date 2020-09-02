@@ -21,35 +21,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.6', '3.7', '3.8']
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dev dependencies
+      - name: t1
         shell: bash
         run: |
-          set -xe
-          python -VV
-          python -m site
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install -r dev-requirements.txt
-      - name: Build wheel
-        run: |
-          python setup.py bdist_wheel
-      - name: Install wheel
-        shell: bash
-        run: |
-          python -m pip install dist/*.whl
-      - name: Install test dependencies
-        run: |
-          python -m pip install -r test-requirements.txt
-      - name: Run Tests
-        run: |
-          cd tests
-          python -m pytest -vv --headless
+          chromedriver --help
+
 
   pypi-release:
     if: startsWith(github.ref, 'refs/tags/v') && github.repository_owner	== 'wpilibsuite'
