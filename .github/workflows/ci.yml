@@ -25,7 +25,7 @@ jobs:
       - name: t1
         shell: bash
         run: |
-          chromedriver --help
+          chromedriver --version
 
 
   pypi-release:
