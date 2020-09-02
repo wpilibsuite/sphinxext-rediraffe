@@ -24,7 +24,7 @@ setuptools.setup(
     url="https://github.com/wpilibsuite/rediraffe",
     packages=["sphinxext"],
     install_requires=["sphinx>=2.0"],
-    extras_require={"rtd": ["myst-parser~=0.12.7"]},
+    extras_require={"rtd": ["myst-parser~=0.12.7", "sphinx_rtd_theme~=0.5.0"]},
     classifiers=[
         "Environment :: Plugins",
         "Environment :: Web Environment",
