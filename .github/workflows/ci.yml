@@ -46,8 +46,6 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install -r test-requirements.txt
-      - name: Install test dependency (chromedriver)
-        uses: nanasess/setup-chromedriver@master
       - name: Run Tests
         run: |
           cd tests
