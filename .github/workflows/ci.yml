@@ -50,7 +50,7 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install -r test-requirements.txt
-          seleniumbase install chromedriver
+          seleniumbase install chromedriver latest
       - name: Run Tests
         run: |
           cd tests
