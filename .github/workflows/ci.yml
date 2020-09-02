@@ -24,7 +24,7 @@ jobs:
         python-version: ['3.6', '3.7', '3.8']
     steps:
       - name: Install Chrome win
-        if: ${{matrix.os == windows-latest}}
+        if: ${{matrix.os == 'windows-latest'}}
         run: |
           choco install chrome -y
       - uses: actions/checkout@v2
