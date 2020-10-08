@@ -1,3 +1,4 @@
+import json
 from os import rename
 import re
 import subprocess
@@ -36,8 +37,10 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
 
 """
 )
-
+REDIRECT_JSON_NAME = "_rediraffe_redirected.json"
 RE_OBJ = re.compile(r"(?:(\"|')(.*?)\1|(\S+))\s+(?:(\"|')(.*?)\4|(\S+))")
+
+READTHEDOCS_BUILDERS = ["readthedocs", "readthedocsdirhtml"]
 
 
 def create_graph(path: Path) -> Dict[str, str]:
@@ -122,10 +125,11 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     """
     Build amd write redirects
     """
-    try:
-        app.env.redirected
-    except AttributeError:
-        app.env.redirected = {}
+    redirect_json_file = Path(app.outdir) / REDIRECT_JSON_NAME
+    if redirect_json_file.exists():
+        redirect_record = json.loads(redirect_json_file.read_text("utf8"))
+    else:
+        redirect_record = {}
 
     if exception != None:
         return
@@ -134,9 +138,12 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         logger.info("rediraffe: Redirect generation skipped for linkcheck builders.")
         return
 
-    if type(app.builder) not in (StandaloneHTMLBuilder, DirectoryHTMLBuilder):
+    if (
+        type(app.builder) not in (StandaloneHTMLBuilder, DirectoryHTMLBuilder)
+        and app.builder.name not in READTHEDOCS_BUILDERS
+    ):
         logger.info(
-            "rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml"
+            "rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml, readthedocs, readthedocsdirhtml."
         )
         return
 
@@ -219,11 +226,11 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
 
         if (
             build_redirect_from.exists()
-            and src_redirect_from.as_posix() in app.env.redirected
+            and src_redirect_from.as_posix() in redirect_record
         ):
             # if it is still pointing to the same source, continue
             if (
-                app.env.redirected[src_redirect_from.as_posix()]
+                redirect_record[src_redirect_from.as_posix()]
                 == src_redirect_to.as_posix()
             ):
                 continue
@@ -262,9 +269,9 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
             logger.info(
                 f'{green("(good)")} {redirect_from} {green("-->")} {redirect_to}'
             )
-            app.env.redirected[
-                src_redirect_from.as_posix()
-            ] = src_redirect_to.as_posix()
+            redirect_record[src_redirect_from.as_posix()] = src_redirect_to.as_posix()
+
+    redirect_json_file.write_text(json.dumps(redirect_record), encoding="utf8")
 
 
 class CheckRedirectsDiffBuilder(Builder):

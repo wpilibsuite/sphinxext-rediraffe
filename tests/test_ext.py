@@ -29,13 +29,16 @@ class TestExtHtml:
         ensure_redirect("another.html", "index.html")
 
     @pytest.mark.sphinx("html", testroot="simple")
-    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+    def test_simple_rebuild(self, app_params, make_app, ensure_redirect):
+        args, kwargs = app_params
+        app = make_app(*args, **kwargs)
         if Path(app.outdir).exists():
             shutil.rmtree(Path(app.outdir))
         app.build()
         assert app.statuscode == 0
-        app.build()
-        assert app.statuscode == 0
+        app2 = make_app(*args, **kwargs)
+        app2.build()
+        assert app2.statuscode == 0
         ensure_redirect("another.html", "index.html")
 
     @pytest.mark.sphinx("html", testroot="no_cycle")
@@ -272,13 +275,16 @@ class TestExtDirHtml:
         ensure_redirect("another/index.html", "index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="simple", freshenv=False)
-    def test_simple_rebuild(self, app: Sphinx, ensure_redirect):
+    def test_simple_rebuild(self, app_params, make_app, ensure_redirect):
+        args, kwargs = app_params
+        app = make_app(*args, **kwargs)
         if Path(app.outdir).exists():
             shutil.rmtree(Path(app.outdir))
         app.build()
         assert app.statuscode == 0
-        app.build()
-        assert app.statuscode == 0
+        app2 = make_app(*args, **kwargs)
+        app2.build()
+        assert app2.statuscode == 0
         ensure_redirect("another/index.html", "index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="no_cycle")
