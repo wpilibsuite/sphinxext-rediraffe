@@ -48,7 +48,7 @@ jobs:
           python -m pip install -r test-requirements.txt
       
       - name: Find Chrome Location
-        if : ${{ matrix.os == windows-latest }}
+        if : ${{ matrix.os == 'windows-latest' }}
         run: |
           if not exist "C:\Program Files (x86)\Google" mkdir "C:\Program Files (x86)\Google"
           if not exist "C:\Program Files (x86)\Google\Chrome" mkdir "C:\Program Files (x86)\Google\Chrome"
