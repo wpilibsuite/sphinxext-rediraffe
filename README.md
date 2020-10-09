@@ -7,7 +7,7 @@ Sphinx Extension to redirect files
 ![Rediraffe](assets/rediraffe_logo.svg)
 
 This sphinx extension redirects non-existent pages to working pages.
-Additionally, a builder is provided to check that deleted/renamed files in your git repo are redirected. 
+Additionally, a builder is provided to check that deleted/renamed files in your git repo are redirected.
 
 Rediraffe supports the html and dirhtml builders.
 
@@ -69,6 +69,7 @@ rediraffe_redirects = "redirects.txt"
 
 redirects.txt:
 ```
+# comments start with "#"
 "another file.rst" index.rst
 another2.rst 'another file.rst'
 ```
