@@ -113,6 +113,24 @@ class TestCreateGraphQuotes:
             "d": "e",
         }
 
+    def test_commented(self, tmp_path):
+        path = tmp_path / "rediraffe.txt"
+        path.write_text(
+            """
+            # a comment
+            a b
+            c d
+            # another comment
+            d e
+            """
+        )
+        graph = create_graph(path)
+        assert graph == {
+            "a": "b",
+            "c": "d",
+            "d": "e",
+        }
+
     def test_double_quotes(self, tmp_path):
         path = tmp_path / "rediraffe.txt"
         path.write_text(
