@@ -46,7 +46,14 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install -r test-requirements.txt
-          seleniumbase install chromedriver latest
+      
+      - name: Find Chrome Location
+        if : ${{ matrix.os == 'windows-latest' }}
+        run: |
+          if not exist "C:\Program Files (x86)\Google" mkdir "C:\Program Files (x86)\Google"
+          if not exist "C:\Program Files (x86)\Google\Chrome" mkdir "C:\Program Files (x86)\Google\Chrome"
+          mklink /D "C:\Program Files (x86)\Google\Chrome\Application" "C:\Program Files\Google\Chrome\Application"
+        shell: cmd
       - name: Run Tests
         run: |
           cd tests
