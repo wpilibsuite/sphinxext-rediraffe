@@ -21,7 +21,7 @@ setuptools.setup(
     description="Sphinx Extension that redirects non-existent pages to working pages.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/wpilibsuite/rediraffe",
+    url="https://github.com/wpilibsuite/sphinxext-rediraffe",
     install_requires=["sphinx>=2.0"],
     packages=["sphinxext"],
     classifiers=[
