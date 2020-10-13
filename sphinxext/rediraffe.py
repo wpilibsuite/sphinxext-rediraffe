@@ -52,7 +52,7 @@ def create_graph(path: Path) -> Dict[str, str]:
     with open(path, "r") as file:
         for line_num, line in enumerate(file):
             line = line.strip()
-            if len(line) == 0:
+            if len(line) == 0 or line.startswith("#"):
                 continue
             match = RE_OBJ.fullmatch(line)
 
