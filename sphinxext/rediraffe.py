@@ -50,7 +50,7 @@ def create_graph(path: Path) -> Dict[str, str]:
     graph_edges = {}
     broken = False
     with open(path, "r") as file:
-        for line_num, line in enumerate(file):
+        for line_num, line in enumerate(file, start=1):
             line = line.strip()
             if len(line) == 0 or line.startswith("#"):
                 continue
