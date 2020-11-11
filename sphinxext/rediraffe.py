@@ -242,12 +242,14 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
                 f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_from} already exists!'
             )
             app.statuscode = 1
+            continue
 
         if not build_redirect_to.exists():
             logger.warning(
                 f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_to} does not exist!'
             )
             app.statuscode = 1
+            continue
 
         build_redirect_from.parent.mkdir(parents=True, exist_ok=True)
         with build_redirect_from.open("w") as f:
