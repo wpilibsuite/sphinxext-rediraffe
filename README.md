@@ -41,7 +41,7 @@ The auto redirect builder can be used to automatically add renamed files to your
 
 To run the auto redirecter:
 1. Set `rediraffe_branch` and `rediraffe_redirects` in conf.py.
-2. Run the `redireaffewritediff` builder.
+2. Run the `rediraffewritediff` builder.
 
 Note: The auto redirect builder only works with a configuration file.
 Note: Deleted files cannot be added to your redirects file automatically.
