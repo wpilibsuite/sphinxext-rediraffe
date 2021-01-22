@@ -27,11 +27,11 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
         </noscript>
     </head>
     <body>
-        <p>You should have been redirected.</p>
-        <a href="{{rel_url}}">If not, click here to continue.</a>
         <script>
             window.location.href = '{{rel_url}}' + (window.location.search || '') + (window.location.hash || '');
         </script>
+        <p>You should have been redirected.</p>
+        <a href="{{rel_url}}">If not, click here to continue.</a>
     </body>
 </html>
 
