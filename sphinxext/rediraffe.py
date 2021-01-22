@@ -27,11 +27,11 @@ DEFAULT_REDIRAFFE_TEMPLATE = Template(
         </noscript>
     </head>
     <body>
-        <p>You should have been redirected.</p>
-        <a href="{{rel_url}}">If not, click here to continue.</a>
         <script>
             window.location.href = '{{rel_url}}' + (window.location.search || '') + (window.location.hash || '');
         </script>
+        <p>You should have been redirected.</p>
+        <a href="{{rel_url}}">If not, click here to continue.</a>
     </body>
 </html>
 
@@ -50,9 +50,9 @@ def create_graph(path: Path) -> Dict[str, str]:
     graph_edges = {}
     broken = False
     with open(path, "r") as file:
-        for line_num, line in enumerate(file):
+        for line_num, line in enumerate(file, start=1):
             line = line.strip()
-            if len(line) == 0:
+            if len(line) == 0 or line.startswith("#"):
                 continue
             match = RE_OBJ.fullmatch(line)
 
@@ -211,10 +211,9 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         redirect_to = src_redirect_to.with_suffix("")
 
         if type(app.builder) == DirectoryHTMLBuilder:
-            master_doc = Path(app.config.master_doc).with_suffix("")
-            if redirect_from != master_doc:
+            if redirect_from.name != "index":
                 redirect_from = redirect_from / "index"
-            if redirect_to != master_doc:
+            if redirect_to.name != "index":
                 redirect_to = redirect_to / "index"
 
         redirect_from = redirect_from.with_suffix(".html")
@@ -242,12 +241,14 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
                 f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_from} already exists!'
             )
             app.statuscode = 1
+            continue
 
         if not build_redirect_to.exists():
             logger.warning(
                 f'{yellow("(broken)")} {redirect_from} redirects to {redirect_to} but {build_redirect_to} does not exist!'
             )
             app.statuscode = 1
+            continue
 
         build_redirect_from.parent.mkdir(parents=True, exist_ok=True)
         with build_redirect_from.open("w") as f:

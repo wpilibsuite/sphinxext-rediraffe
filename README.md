@@ -7,11 +7,11 @@ Sphinx Extension to redirect files
 ![Rediraffe](assets/rediraffe_logo.svg)
 
 This sphinx extension redirects non-existent pages to working pages.
-Additionally, a builder is provided to check that deleted/renamed files in your git repo are redirected. 
+Rediraffe can also check that deleted/renamed files in your git repo are redirected.
 
-Rediraffe supports the html and dirhtml builders.
+Rediraffe creates a graph of all specified redirects and traverses it to point all internal urls to leaf urls. This means that chained redirects will be resolved. For example, if a config has 6 chained redirects, all 6 links will redirect directly to the final link. The end user will never experience more than 1 redirection.
 
-Note: Chained redirects will be resolved. For example, if a config has 6 chained redirects, all 6 links will redirect directly to the final link. The end user will never experience more than 1 redirection.
+Note: Rediraffe supports the html and dirhtml builders.
 
 ## Installation
 
@@ -23,16 +23,25 @@ Add `sphinxext.rediraffe` to your extensions list in your `conf.py`
 
 ```python
 extensions = [
-   sphinxext.rediraffe,
+   "sphinxext.rediraffe",
 ]
 ```
 
-To check that deleted/renamed files in your git repo are in your redirects,
-1. Make sure `rediraffe_branch` and `rediraffe_redirects` are set in conf.py.
+Set `rediraffe_redirects` to a dict or file of redirects in your `conf.py`
+
+### Diff Checker
+The diff checker ensures that deleted/renamed files in your git repo are in your redirects.
+
+To run the diff checker,
+1. Set `rediraffe_branch` and `rediraffe_redirects` in conf.py.
 2. Run the `rediraffecheckdiff` builder.
 
 ### Auto Redirect builder
-For convenience, the auto redirect builder can be used to automatically add renamed files to your redirects file. Simply run the `rediraffewritediff` builder.
+The auto redirect builder can be used to automatically add renamed files to your redirects file. Simply run the `rediraffewritediff` builder.
+
+To run the auto redirecter:
+1. Set `rediraffe_branch` and `rediraffe_redirects` in conf.py.
+2. Run the `rediraffewritediff` builder.
 
 Note: The auto redirect builder only works with a configuration file.
 Note: Deleted files cannot be added to your redirects file automatically.
@@ -41,7 +50,7 @@ Note: Deleted files cannot be added to your redirects file automatically.
 These values are placed in the conf.py of your sphinx project.
 
 * `rediraffe_branch`
-    * Required for rediraffecheckdiff builder. The branch or commit to diff against.
+    * Required for the `rediraffecheckdiff` and `rediraffewritediff` builders. The branch or commit to diff against.
 
 * `rediraffe_redirects`
     * Required. A filename or dict containing redirects
@@ -56,7 +65,7 @@ These values are placed in the conf.py of your sphinx project.
         * `rel_url` - the relative path from from_url to to_url.
 
 * `rediraffe_auto_redirect_perc`
-    * Optional. The percentage as an integer representing the accuracy required before auto redirecting with the `rediraffewritediff` builder. The default is 100.
+    * Optional. Only used by the `rediraffewritediff` builder. The percentage as an integer representing the accuracy required before auto redirecting with the `rediraffewritediff` builder. The default is 100.
 
 ## Example Config
 
@@ -69,6 +78,7 @@ rediraffe_redirects = "redirects.txt"
 
 redirects.txt:
 ```
+# comments start with "#"
 "another file.rst" index.rst
 another2.rst 'another file.rst'
 ```
