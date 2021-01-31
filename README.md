@@ -101,7 +101,7 @@ rediraffe_redirects = {
 conf.py:
 ```python
 rediraffe_redirects = "redirects.txt"
-rediraffe_branch = "master~1"
+rediraffe_branch = "main~1"
 ```
 
 ### redirects with jinja template
