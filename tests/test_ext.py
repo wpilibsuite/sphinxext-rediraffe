@@ -74,6 +74,12 @@ class TestExtHtml:
         ensure_redirect("docs/folder2/toindex.html", "index.html")
         ensure_redirect("totoindex.html", "index.html")
 
+    @pytest.mark.sphinx("html", testroot="dot_in_filename")
+    def test_dot_in_filename(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("docs/x.y.z.html", "docs/a.b.c.html")
+
     @pytest.mark.sphinx("html", testroot="mixed_slashes")
     def test_mixed_slashes(self, app: Sphinx, ensure_redirect):
         app.build()
@@ -325,6 +331,12 @@ class TestExtDirHtml:
         ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
         ensure_redirect("docs/folder2/toindex/index.html", "index.html")
         ensure_redirect("totoindex/index.html", "index.html")
+
+    @pytest.mark.sphinx("dirhtml", testroot="dot_in_filename")
+    def test_dot_in_filename(self, app: Sphinx, ensure_redirect):
+        app.build()
+        assert app.statuscode == 0
+        ensure_redirect("docs/x.y.z/index.html", "docs/a.b.c/index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="mixed_slashes")
     def test_mixed_slashes(self, app: Sphinx, ensure_redirect):

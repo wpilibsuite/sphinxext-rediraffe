@@ -121,6 +121,14 @@ def create_simple_redirects(graph_edges: dict) -> dict:
     return redirects
 
 
+def remove_suffix(docname: str, suffixes: List[str]) -> str:
+    """Remove any known suffixes for a file path."""
+    for suffix in suffixes:
+        if docname.endswith(suffix):
+            return docname[: -len(suffix)]
+    return docname
+
+
 def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
     """
     Build amd write redirects
@@ -206,18 +214,22 @@ def build_redirects(app: Sphinx, exception: Union[Exception, None]) -> None:
         src_redirect_from = Path(PureWindowsPath(src_redirect_from))
         src_redirect_to = Path(PureWindowsPath(src_redirect_to))
 
-        # relative paths from source dir (without ext)
-        redirect_from = src_redirect_from.with_suffix("")
-        redirect_to = src_redirect_to.with_suffix("")
+        # remove extensions
+        redirect_from_name = remove_suffix(
+            src_redirect_from.name, app.config.source_suffix
+        )
+        redirect_to_name = remove_suffix(src_redirect_to.name, app.config.source_suffix)
+
+        redirect_from = src_redirect_from.parent / f"{redirect_from_name}.html"
+        redirect_to = src_redirect_to.parent / f"{redirect_to_name}.html"
 
         if type(app.builder) == DirectoryHTMLBuilder:
-            if redirect_from.name != "index":
-                redirect_from = redirect_from / "index"
-            if redirect_to.name != "index":
-                redirect_to = redirect_to / "index"
-
-        redirect_from = redirect_from.with_suffix(".html")
-        redirect_to = redirect_to.with_suffix(".html")
+            if redirect_from_name != "index":
+                redirect_from = (
+                    src_redirect_from.parent / redirect_from_name / "index.html"
+                )
+            if redirect_to_name != "index":
+                redirect_to = src_redirect_to.parent / redirect_to_name / "index.html"
 
         # absolute paths into the build dir
         build_redirect_from = Path(app.outdir) / redirect_from
