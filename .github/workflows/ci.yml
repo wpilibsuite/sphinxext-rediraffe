@@ -21,7 +21,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9']
+        sphinx: ['2', '3', '==4.0.0b1']
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -36,6 +37,7 @@ jobs:
           python -m site
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install -r dev-requirements.txt
+          python -m pip install ${{ matrix.sphinx }}
       - name: Build wheel
         run: |
           python setup.py bdist_wheel
