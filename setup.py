@@ -8,7 +8,7 @@ try:
     )
     version = ret.decode("utf-8").strip()
 except:
-    version = "master"
+    version = "main"
 
 with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
@@ -44,4 +44,5 @@ setuptools.setup(
         "Topic :: Utilities",
     ],
     python_requires=">=3.6",
+    include_package_data=True,
 )
