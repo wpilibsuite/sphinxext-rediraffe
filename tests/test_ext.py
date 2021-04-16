@@ -343,6 +343,10 @@ class TestExtDirHtml:
         app.build()
         assert app.statuscode == 0
         ensure_redirect("tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof1/index.html", "docs/folder1/f1/index.html")
+        ensure_redirect("docs/folder1/tof2/index.html", "docs/folder2/f2/index.html")
+        ensure_redirect("docs/folder2/toindex/index.html", "index.html")
+        ensure_redirect("totoindex/index.html", "index.html")
 
     @pytest.mark.sphinx("dirhtml", testroot="link_redirected_twice")
     def test_link_redirected_twice(self, app: Sphinx):
