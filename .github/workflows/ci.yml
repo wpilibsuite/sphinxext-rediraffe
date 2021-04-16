@@ -16,7 +16,7 @@ jobs:
     - uses: pre-commit/action@v2.0.0
 
   test:
-    name: "Build (${{ matrix.os }} Python ${{ matrix.python-version }})"
+    name: "Build (${{ matrix.os }} Python ${{ matrix.python-version }}) Sphinx ${{ matrix.sphinx }}"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
