@@ -16,12 +16,13 @@ jobs:
     - uses: pre-commit/action@v2.0.0
 
   test:
-    name: "Build (${{ matrix.os }} Python ${{ matrix.python-version }})"
-    runs-on: ${{ matrix.os }}
+    name: "Test - ${{ matrix.os }}, py ${{ matrix.python-version }}, Sphinx ${{ matrix.sphinx }}"
+    runs-on: "${{ matrix.os }}-latest"
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        os: [ubuntu, windows, macos]
+        python-version: ['3.7', '3.8', '3.9']
+        sphinx: ['2', '3', '4']
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -36,6 +37,7 @@ jobs:
           python -m site
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install -r dev-requirements.txt
+          python -m pip install sphinx==${{ matrix.sphinx }}.*
       - name: Build wheel
         run: |
           python setup.py bdist_wheel
@@ -48,7 +50,7 @@ jobs:
           python -m pip install -r test-requirements.txt
       
       - name: Find Chrome Location
-        if : ${{ matrix.os == 'windows-latest' }}
+        if : ${{ matrix.os == 'windows' }}
         run: |
           if not exist "C:\Program Files (x86)\Google" mkdir "C:\Program Files (x86)\Google"
           if not exist "C:\Program Files (x86)\Google\Chrome" mkdir "C:\Program Files (x86)\Google\Chrome"
