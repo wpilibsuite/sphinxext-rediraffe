@@ -13,7 +13,7 @@ Rediraffe creates a graph of all specified redirects and traverses it to point a
 
 Note: Rediraffe supports the html and dirhtml builders.
 
-## Installation
+## Installationqqq
 
 `python -m pip install sphinxext-rediraffe`
 
