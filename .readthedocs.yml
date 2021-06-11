@@ -1,0 +1,12 @@
+version: 2
+
+python:
+  version: 3
+  install:
+      - method: pip
+        path: .
+      - requirements: docs/requirements.txt
+
+sphinx:
+  builder: html
+  fail_on_warning: true

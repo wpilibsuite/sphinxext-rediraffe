@@ -22,8 +22,8 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/wpilibsuite/sphinxext-rediraffe",
-    install_requires=["sphinx>=2.0"],
     packages=["sphinxext"],
+    install_requires=["sphinx>=2.0"],
     classifiers=[
         "Environment :: Plugins",
         "Environment :: Web Environment",
