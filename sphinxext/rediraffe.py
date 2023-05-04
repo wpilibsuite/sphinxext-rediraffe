@@ -346,7 +346,7 @@ class CheckRedirectsDiffBuilder(Builder):
         rename_hints = {}
         for line in renamed_files_out:
             line = line.strip()
-            r_perc, rename_from, rename_to = re.split(r"\s+", line)
+            r_perc, rename_from, rename_to = re.split(r"\t", line)
             perc = int(r_perc[1:])
             path_rename_from = abs_path_in_src_dir_w_src_suffix(rename_from)
             path_rename_to = abs_path_in_src_dir_w_src_suffix(rename_to)
