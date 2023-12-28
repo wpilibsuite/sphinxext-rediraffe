@@ -1,4 +1,4 @@
 sphinx
-jinja2<3.1
+jinja2
 wheel<43
 setuptools<70
