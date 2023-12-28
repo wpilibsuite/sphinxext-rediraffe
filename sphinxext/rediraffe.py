@@ -384,7 +384,6 @@ class CheckRedirectsDiffBuilder(Builder):
                 self.app.statuscode = 1
 
         with redirects_path.open("a") as redirects_file:
-
             for renamed_file in rename_hints:
                 hint_to, perc = rename_hints[renamed_file]
 
