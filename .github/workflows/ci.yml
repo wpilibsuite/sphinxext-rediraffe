@@ -22,7 +22,7 @@ jobs:
       matrix:
         os: [ubuntu, windows, macos]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        sphinx: ['2', '3', '4', '5', '6', '7']
+        sphinx: ['4', '5', '6', '7']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
