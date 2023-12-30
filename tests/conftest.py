@@ -95,7 +95,6 @@ def app_init_repo(make_app, app_params):
     commits = []
 
     for item_path in src_item_paths:
-
         if not item_path.name.startswith("HEAD"):
             continue
 
@@ -143,7 +142,7 @@ def rel2url(outdir, path):
 
 @pytest.fixture(scope="session")
 def _sb(request):
-    """ Same as the sb fixture but with a session scope"""
+    """Same as the sb fixture but with a session scope"""
     from seleniumbase import BaseCase
 
     class BaseClass(BaseCase):

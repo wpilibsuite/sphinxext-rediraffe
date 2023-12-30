@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
-    - uses: pre-commit/action@v2.0.0
+    - uses: pre-commit/action@v3.0.0
 
   test:
     name: "Test - ${{ matrix.os }}, py ${{ matrix.python-version }}, Sphinx ${{ matrix.sphinx }}"
@@ -21,12 +21,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, windows, macos]
-        python-version: ['3.7', '3.8', '3.9']
-        sphinx: ['2', '3', '4']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        sphinx: ['4', '5', '6', '7']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dev dependencies
@@ -64,11 +66,13 @@ jobs:
   build-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Install dependencies
         run: |
           pip install -r docs/requirements.txt
@@ -82,13 +86,13 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.7'
+          python-version: '3.11'
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
